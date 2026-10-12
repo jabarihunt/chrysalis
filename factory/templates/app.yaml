@@ -1,0 +1,23 @@
+# App configuration. The app setup script writes this file at apps/<app>/app.yaml.
+# Change it only at the human's request.
+
+# Folder name under apps/. Lowercase letters, numbers, and hyphens.
+name: <app>
+
+# One sentence on what the app does.
+description: <description>
+
+# Stack profile under factory/stacks/.
+stack: jabstack
+
+tracker:
+  # local or github.
+  type: local
+  # For github only. The repository that holds this app's issues.
+  # Leave it out to use this repository's origin remote.
+  # repo: <owner>/<repo>
+
+# criteria: the human approves every slice's acceptance criteria.
+# risk-based: the human approves only slices that change a contract, the schema,
+# the PRD, the ARD, or an area the ARD marks security-sensitive.
+spec_approval: criteria

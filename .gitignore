@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment files. Commit .env.example only.
+.env
+.env.*
+!.env.example
+
+# Local tracker worktree. Its files live on the backlog branch.
+/backlog/
+
+# Build and test output
+dist/
+build/
+.svelte-kit/
+coverage/
+playwright-report/
+test-results/
+
+# OS files
+.DS_Store
