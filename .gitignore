@@ -9,6 +9,10 @@ node_modules/
 # Local tracker worktree. Its files live on the backlog branch.
 /backlog/
 
+# Personal Claude Code settings and instructions
+CLAUDE.local.md
+.claude/settings.local.json
+
 # Build and test output
 dist/
 build/

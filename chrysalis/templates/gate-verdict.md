@@ -7,6 +7,8 @@ Verdict: <pass or block>
 Commit: <the SHA checked>
 Range: <the git range reviewed, such as master...HEAD>
 Block count: <blocks at this gate on this issue, including this one, such as 1 of 3>
+Model: <tool and model ID, such as kiro claude-opus-5.5>
+Same family as the reviewed work: <yes or no. Yes is allowed only in a tool marked single_family in chrysalis/models.yaml.>
 
 ## Findings
 

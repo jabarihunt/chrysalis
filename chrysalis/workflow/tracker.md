@@ -10,14 +10,14 @@ Each app has one tracker, named in its `app.yaml`. Agents reach every tracker th
 
 ## The tracker CLI
 
-Phase 3 of the factory plan builds `bun chrysalis/scripts/tracker.ts`. Every command takes `--app <app>` and `--agent <agent name>`. Factory issues use `--app factory`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON.
+Phase 3 of the factory plan builds `bun chrysalis/scripts/tracker.ts`. Every command takes `--app <app>` and `--agent <agent name>`. Factory issues use `--app factory`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON. `--body-file -` reads the body from standard input, so agents with no write scope, such as the TPM and the gate agents, can create issues and post comments without writing a file.
 
 | Command | Does | Who may run it |
 |---|---|---|
-| `create --kind <kind> --title <title> --body-file <path> [--parent <ref>]` | Creates an issue and prints its reference | TPM |
+| `create --kind <kind> --title <title> --body-file <path or -> [--parent <ref>]` | Creates an issue and prints its reference | TPM |
 | `show <ref>` | Prints the issue's fields, body, and comments | Any agent |
 | `list [--status <status>] [--kind <kind>]` | Lists issues | Any agent |
-| `comment <ref> --type <type> --body-file <path>` | Adds a comment | Any agent |
+| `comment <ref> --type <type> --body-file <path or ->` | Adds a comment | Any agent |
 | `set <ref> --status <status>` | Changes the status | TPM. Gate agents may set `blocked` and clear their own block. |
 | `link <ref> --field <field> --value <value>` | Sets a field such as `spec`, `spec_sha`, `red_sha`, `branch`, or `pr` | TPM |
 | `close <ref> --status <done or cancelled>` | Sets the final status and closes the issue | TPM |

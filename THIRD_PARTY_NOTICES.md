@@ -8,6 +8,9 @@ Parts of this repository are copied or adapted from the projects below. Each ski
 | `chrysalis/templates/agent-brief.md` | pstack, `pstack/skills/poteto-mode/playbooks/orchestrate.md` | Brief fields adapted. |
 | `chrysalis/templates/adr.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/ADR-FORMAT.md` | Format adapted. |
 | `chrysalis/templates/glossary.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/GLOSSARY-FORMAT.md` | Format adapted. |
+| `chrysalis/agents/code-review.md` and `chrysalis/workflow/gates.md` | Matt Pocock's skills, `skills/engineering/code-review/SKILL.md` | The spec and standards review axes adapted. |
+| `chrysalis/agents/spec-writer.md` | Matt Pocock's skills, `skills/engineering/to-spec/SKILL.md`, `skills/engineering/to-tickets/SKILL.md`, and `skills/engineering/domain-modeling/ADR-FORMAT.md` | Seam choice, vertical slices, and when to write an ADR adapted. |
+| `chrysalis/agents/test.md` and `chrysalis/workflow/gates.md` | pstack, `pstack/skills/principle-test-behavior-not-implementation/SKILL.md` | The test that fails when every import returns `undefined` adapted. |
 
 ## pstack
 

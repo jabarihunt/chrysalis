@@ -60,7 +60,7 @@ These follow from the decisions above. Confirm them in the stack session.
 
 - The stack knowledge in `CLAUDE.md`, `documentation/CLAUDE.md`, `documentation/LLM_CONTEXT.md`, `.cursorrules`, and `.windsurfrules` moves into the factory's stack profile at `chrysalis/stacks/jabstack/`. This includes the rule that `/dashboard` routes use shadcn-svelte and all other routes use Bits UI.
 - App setup doesn't copy those files or `.mcp/` into `apps/<app>/`.
-- The factory generates MCP config for each tool. Cursor reads project MCP config from `.cursor/mcp.json` and Kilo reads it from its own config file, so `.mcp/mcp.json` may not load in either. Check this in the stack session.
+- The factory generates MCP config for each tool. Cursor reads project MCP config from `.cursor/mcp.json`, Kilo reads it from its own config file, Kiro reads `.kiro/settings/mcp.json`, and Claude Code reads `.mcp.json` at the repository root, so `.mcp/mcp.json` may not load in any of them. Kiro agents also get those servers only when their agent file sets `includeMcpJson: true`. Check this in the stack session.
 - Whether the JabStack repo keeps these files for use outside the factory is Q-04.
 
 ## Observed in the repo, not yet decided

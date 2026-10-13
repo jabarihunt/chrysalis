@@ -2,7 +2,7 @@
 
 Chrysalis is an agentic software factory. You bring a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
 
-Chrysalis is a draft. Phase 1, the workflow and templates, is written. The agent files, skills, scripts, and a pilot app come in later phases, listed in [the todo list](chrysalis/docs/planning/todo.md).
+Chrysalis is a draft. Phase 1 wrote the workflow and templates, and phase 2 wrote the agent files and model classes. The skills, scripts, and a pilot app come in later phases, listed in [the todo list](chrysalis/docs/planning/todo.md).
 
 ## How it works
 
@@ -10,19 +10,22 @@ Chrysalis is a draft. Phase 1, the workflow and templates, is written. The agent
 
 ## Starting a session
 
-Open the repository in Cursor or Kilo. Both load [AGENTS.md](AGENTS.md), which decides the agent's role.
+Open the repository in Cursor, Kilo, Kiro, or Claude Code. Each one loads [AGENTS.md](AGENTS.md), which decides the agent's role. Claude Code loads it through [CLAUDE.md](CLAUDE.md).
 
 - To build or change an app, describe what you want. The agent works as the TPM.
 - To change the factory itself, start your first message with `factory:`. The agent works as the factory-maintainer.
 
-Until phase 2 adds the agent files, the agent follows the pipeline directly.
+The tools list the agents in their menus once phase 4 generates each tool's agent files. Until then, the TPM starts each agent with a brief that names its file.
 
 ## Layout
 
 | Path | Holds |
 |---|---|
 | `AGENTS.md` | The entry point for every agent session |
+| `CLAUDE.md` | An import of `AGENTS.md`, so Claude Code loads it reliably |
 | `apps/` | One folder per app, created by app setup |
+| `chrysalis/agents/` | One file per agent, with its role, write scope, skills, and model class |
+| `chrysalis/models.yaml` | The model each model class uses in each tool |
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
 | `chrysalis/templates/` | Templates for specs, issues, briefs, and verdicts |
 | `chrysalis/skills/` | Skills the agents read |

@@ -15,6 +15,7 @@ A gate decides whether work moves to the next step. Agent gates post a verdict o
 ## Verdicts
 
 - Gate agents post verdicts with the [gate verdict template](../templates/gate-verdict.md). A verdict is `pass` or `block`, and it names the commit SHA it checked.
+- A verdict names the tool and model it ran on, and whether that model's family matches the family of the work it reviewed. A same-family verdict is allowed only in a tool marked `single_family` in `chrysalis/models.yaml`.
 - A pass stays valid while every later commit changes only files outside the gate's inputs. The RED review takes the spec and the acceptance tests as input. The security and test gates take every file except docs for people. The code review gate takes every file.
 - A block sets the issue to `blocked`. Only a pass from the same gate clears it.
 - Each block counts toward that gate's limit on the issue. The third block goes to the human.
@@ -61,7 +62,7 @@ For a bug, the same checks apply to the single regression test and the criterion
 
 ## RED review
 
-The code review agent reviews the tests in the RED commit before any implementation starts. It runs on a different model family from the test agent, and it changes no files. It reruns `check.ts --red` first. The tests pass the review when every criterion's test:
+The code review agent reviews the tests in the RED commit before any implementation starts. It runs on a different model from the test agent, as [factory ADR 0022](../docs/adr/0022-gate-models-differ-from-the-work-they-review.md) requires, and it changes no files. It reruns `check.ts --red` first. The tests pass the review when every criterion's test:
 - asserts the criterion's Then line, with expected values taken from the spec instead of computed the way the code would compute them,
 - reaches the app only through the seam the spec names,
 - would fail if the feature returned nothing or did nothing.

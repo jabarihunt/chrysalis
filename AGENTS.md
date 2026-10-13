@@ -10,7 +10,7 @@ Take the first case that matches.
 2. The human's first message starts with `factory:`. You are the factory-maintainer. Read `chrysalis/agents/factory-maintainer.md`.
 3. Anything else. You are the TPM. Read `chrysalis/agents/tpm.md`.
 
-The factory is a draft. If the agent file for your role doesn't exist yet, follow [the pipeline](chrysalis/workflow/pipeline.md) directly and tell the human which file is missing.
+The factory is a draft. If a file your agent file lists doesn't exist yet, such as a skill, skip it and tell the human which file is missing.
 
 ## Rules for every agent
 

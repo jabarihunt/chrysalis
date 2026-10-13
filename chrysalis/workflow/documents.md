@@ -23,8 +23,9 @@ Small changes, bugs, and docs-only work have no spec file. The issue body is the
 
 | Document | Written by | Path |
 |---|---|---|
-| Agent instructions | Factory-maintainer | `AGENTS.md`, `chrysalis/agents/` |
+| Agent instructions | Factory-maintainer | `AGENTS.md`, `CLAUDE.md`, `chrysalis/agents/` |
 | Workflow | Factory-maintainer | `chrysalis/workflow/` |
+| Model classes | Factory-maintainer | `chrysalis/models.yaml` |
 | Templates | Factory-maintainer | `chrysalis/templates/` |
 | Skills | Factory-maintainer | `chrysalis/skills/` |
 | Factory ADRs | Factory-maintainer | `chrysalis/docs/adr/` |
