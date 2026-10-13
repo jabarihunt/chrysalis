@@ -1,6 +1,6 @@
 # Open questions
 
-These questions are waiting on a decision or a check. Each has an ID so other documents can cite it. When a question is settled, record the answer as an ADR in `factory/docs/adr/` and move the question to the closed table with the ADR number. Once the factory's tracker CLI exists, these questions move to the tracker as issues and this file is deleted.
+These questions are waiting on a decision or a check. Each has an ID so other documents can cite it. When a question is settled, record the answer as an ADR in `chrysalis/docs/adr/` and move the question to the closed table with the ADR number. Once the factory's tracker CLI exists, these questions move to the tracker as issues and this file is deleted.
 
 ## Open
 
@@ -15,7 +15,7 @@ These questions are waiting on a decision or a check. Each has an ID so other do
 | Q-11 | Which model IDs does each model class map to in Cursor and Kilo? | Phase 2 | None yet. |
 | Q-12 | Can Cursor offer the factory-maintainer as a selectable primary agent, the way Kilo switches agents with Tab? | Check in phase 4 | Start maintainer sessions with the `factory:` prefix in every tool. |
 | Q-13 | Can Cursor hide subagents from the user's menu, the way Kilo's `hidden: true` does? | Check in phase 4 | Unknown. |
-| Q-15 | Which license does JabWorks use? | Before the repository goes public | None. The repository is private, so all rights are reserved. |
+| Q-15 | Which license does Chrysalis use? | Before the repository goes public | None. The repository is private, so all rights are reserved. |
 
 ## Closed
 

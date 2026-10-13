@@ -1,6 +1,6 @@
 <!-- Agent brief template. The TPM fills one in for every agent run. The agent sees only this brief and the files it points to, so a field you can't fill means the run isn't ready. Fields adapted from the brief in pstack's orchestrate playbook. See THIRD_PARTY_NOTICES.md. Delete these comments. -->
 
-ROLE: You are the <agent> agent. Read `factory/agents/<agent>.md` and every skill it lists before you start.
+ROLE: You are the <agent> agent. Read `chrysalis/agents/<agent>.md` and every skill it lists before you start.
 
 ISSUE: <app>#<n>, currently `<status>`
 

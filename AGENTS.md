@@ -1,20 +1,20 @@
-# Factory
+# Chrysalis
 
-This repository is a software factory. Agents build the apps in `apps/` through a spec-first, test-first pipeline. The factory's agents, skills, and workflow live in `factory/`.
+This repository is Chrysalis, a software factory. Agents build the apps in `apps/` through a spec-first, test-first pipeline. The factory's agents, skills, and workflow live in `chrysalis/`.
 
 ## Who you are
 
 Take the first case that matches.
 
 1. Your prompt is an agent brief that names an agent file. You are that agent. Read the agent file and the skills it lists, then follow the brief. Skip the rest of this section.
-2. The human's first message starts with `factory:`. You are the factory-maintainer. Read `factory/agents/factory-maintainer.md`.
-3. Anything else. You are the TPM. Read `factory/agents/tpm.md`.
+2. The human's first message starts with `factory:`. You are the factory-maintainer. Read `chrysalis/agents/factory-maintainer.md`.
+3. Anything else. You are the TPM. Read `chrysalis/agents/tpm.md`.
 
-The factory is a draft. If the agent file for your role doesn't exist yet, follow [the pipeline](factory/workflow/pipeline.md) directly and tell the human which file is missing.
+The factory is a draft. If the agent file for your role doesn't exist yet, follow [the pipeline](chrysalis/workflow/pipeline.md) directly and tell the human which file is missing.
 
 ## Rules for every agent
 
-- Apply [unslop](factory/skills/unslop/SKILL.md) to all prose you write: docs, specs, issue comments, reports, and commit messages.
+- Apply [unslop](chrysalis/skills/unslop/SKILL.md) to all prose you write: docs, specs, issue comments, reports, and commit messages.
 - Write only inside the write scope in your agent file.
 - During app work, only the TPM talks to the human. Every other agent posts questions on the issue through the tracker CLI, and the TPM routes them.
 - Product decisions belong to the human. When something is unclear, ask on the issue and wait for the answer.
@@ -26,10 +26,10 @@ The factory is a draft. If the agent file for your role doesn't exist yet, follo
 
 ## When to read what
 
-- Before you start a step or change an issue's status, read [the pipeline](factory/workflow/pipeline.md).
-- Before you run or report a gate, read [the gates](factory/workflow/gates.md).
-- Before you write or approve a document, read [the document map](factory/workflow/documents.md).
-- Before you call the tracker CLI, read [the tracker guide](factory/workflow/tracker.md).
-- To start any document, issue, comment, or brief, copy its template from `factory/templates/`.
+- Before you start a step or change an issue's status, read [the pipeline](chrysalis/workflow/pipeline.md).
+- Before you run or report a gate, read [the gates](chrysalis/workflow/gates.md).
+- Before you write or approve a document, read [the document map](chrysalis/workflow/documents.md).
+- Before you call the tracker CLI, read [the tracker guide](chrysalis/workflow/tracker.md).
+- To start any document, issue, comment, or brief, copy its template from `chrysalis/templates/`.
 - For an app's stack, tracker, and approval mode, read `apps/<app>/app.yaml`.
-- For why the factory works this way, read `factory/docs/adr/`.
+- For why the factory works this way, read `chrysalis/docs/adr/`.

@@ -1,12 +1,12 @@
-# JabWorks
+# Chrysalis
 
-JabWorks is an agentic software factory. You bring a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
+Chrysalis is an agentic software factory. You bring a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
 
-JabWorks is a draft. Phase 1, the workflow and templates, is written. The agent files, skills, scripts, and a pilot app come in later phases, listed in [the todo list](factory/docs/planning/todo.md).
+Chrysalis is a draft. Phase 1, the workflow and templates, is written. The agent files, skills, scripts, and a pilot app come in later phases, listed in [the todo list](chrysalis/docs/planning/todo.md).
 
 ## How it works
 
-[The pipeline](factory/workflow/pipeline.md) has the full flow, with a diagram, the request classes, the statuses, and the escalation rules. [The gates](factory/workflow/gates.md) say what each check requires before work moves on.
+[The pipeline](chrysalis/workflow/pipeline.md) has the full flow, with a diagram, the request classes, the statuses, and the escalation rules. [The gates](chrysalis/workflow/gates.md) say what each check requires before work moves on.
 
 ## Starting a session
 
@@ -23,11 +23,11 @@ Until phase 2 adds the agent files, the agent follows the pipeline directly.
 |---|---|
 | `AGENTS.md` | The entry point for every agent session |
 | `apps/` | One folder per app, created by app setup |
-| `factory/workflow/` | The pipeline, gates, document map, and tracker rules |
-| `factory/templates/` | Templates for specs, issues, briefs, and verdicts |
-| `factory/skills/` | Skills the agents read |
-| `factory/docs/adr/` | Decisions about the factory, and why they were made |
-| `factory/docs/planning/` | Open questions, todos, and planning notes |
+| `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
+| `chrysalis/templates/` | Templates for specs, issues, briefs, and verdicts |
+| `chrysalis/skills/` | Skills the agents read |
+| `chrysalis/docs/adr/` | Decisions about the factory, and why they were made |
+| `chrysalis/docs/planning/` | Open questions, todos, and planning notes |
 
 ## Credits
 

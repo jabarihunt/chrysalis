@@ -7,16 +7,16 @@ This file defines how a human request becomes merged code. The TPM runs the pipe
 | Role | Does | Agent file |
 |---|---|---|
 | Human | Makes requests. Approves cuts, acceptance criteria, PRDs, and ARDs. Answers escalations. Opens and merges pull requests. | None |
-| TPM | Talks to the human, classifies requests, writes briefs, sets the order of work, changes issue statuses, routes questions, and escalates. Writes no product code. | `factory/agents/tpm.md` |
-| Spec writer | Writes PRDs, ARDs, feature briefs, cuts, slice specs, ADRs, and the glossary. Writes for agents. | `factory/agents/spec-writer.md` |
-| Documentation | Writes docs for people: guides, the README, the changelog, and PR bodies. | `factory/agents/documentation.md` |
-| Database | Writes schema changes and migrations. | `factory/agents/database.md` |
-| Backend | Writes server code. | `factory/agents/backend.md` |
-| Frontend | Writes UI code. | `factory/agents/frontend.md` |
-| Test | Writes failing acceptance tests and runs the RED check before implementation, then runs the test gate. | `factory/agents/test.md` |
-| Security | Runs the security gate. | `factory/agents/security.md` |
-| Code review | Runs the RED review before implementation and the code review gate after it. | `factory/agents/code-review.md` |
-| Factory-maintainer | Changes the factory itself. Takes no part in app work. | `factory/agents/factory-maintainer.md` |
+| TPM | Talks to the human, classifies requests, writes briefs, sets the order of work, changes issue statuses, routes questions, and escalates. Writes no product code. | `chrysalis/agents/tpm.md` |
+| Spec writer | Writes PRDs, ARDs, feature briefs, cuts, slice specs, ADRs, and the glossary. Writes for agents. | `chrysalis/agents/spec-writer.md` |
+| Documentation | Writes docs for people: guides, the README, the changelog, and PR bodies. | `chrysalis/agents/documentation.md` |
+| Database | Writes schema changes and migrations. | `chrysalis/agents/database.md` |
+| Backend | Writes server code. | `chrysalis/agents/backend.md` |
+| Frontend | Writes UI code. | `chrysalis/agents/frontend.md` |
+| Test | Writes failing acceptance tests and runs the RED check before implementation, then runs the test gate. | `chrysalis/agents/test.md` |
+| Security | Runs the security gate. | `chrysalis/agents/security.md` |
+| Code review | Runs the RED review before implementation and the code review gate after it. | `chrysalis/agents/code-review.md` |
+| Factory-maintainer | Changes the factory itself. Takes no part in app work. | `chrysalis/agents/factory-maintainer.md` |
 
 Each agent file sets the agent's write scope. The app's stack profile turns write scopes into file patterns.
 
@@ -34,7 +34,7 @@ The TPM classifies every request before work starts. Take the first class that f
 
 | Class | Fits when | Path |
 |---|---|---|
-| Factory change | The request changes `factory/`, a file at the repository root such as `AGENTS.md`, generated tool config, or CI. | Tell the human to start a factory-maintainer session with a message that begins with `factory:`. |
+| Factory change | The request changes `chrysalis/`, a file at the repository root such as `AGENTS.md`, generated tool config, or CI. | Tell the human to start a factory-maintainer session with a message that begins with `factory:`. |
 | New app | The app doesn't exist yet. | [App setup](#app-setup) |
 | Bug | Current behavior breaks a criterion in an approved spec, a requirement in the ARD, or documented behavior, and the TPM can cite which one. | [Bug](#bug) |
 | Docs only | Only documents change. | [Docs only](#docs-only) |
@@ -219,4 +219,4 @@ To escalate, the TPM saves the current status in `prior_status`, sets `needs-hum
 
 ## Checks
 
-`factory/scripts/check.ts` runs the automated checks listed in [the gates file](gates.md#automated-checks), on demand and in CI. The TPM runs it before setting `ready-for-pr`, and the code review agent runs it on every review.
+`chrysalis/scripts/check.ts` runs the automated checks listed in [the gates file](gates.md#automated-checks), on demand and in CI. The TPM runs it before setting `ready-for-pr`, and the code review agent runs it on every review.

@@ -7,7 +7,7 @@ name: <app>
 # One sentence on what the app does.
 description: <description>
 
-# Stack profile under factory/stacks/.
+# Stack profile under chrysalis/stacks/.
 stack: jabstack
 
 tracker:

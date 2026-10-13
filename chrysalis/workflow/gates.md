@@ -52,7 +52,7 @@ The test agent runs this check on its own tests before it reports. It confirms t
 - each test fails because the behavior is missing, not because of a setup error, a syntax error, or a missing fixture,
 - the tests drive the app only through the seams the spec names.
 
-The test agent then runs `factory/scripts/check.ts --red` on the RED commit. The script confirms that:
+The test agent then runs `chrysalis/scripts/check.ts --red` on the RED commit. The script confirms that:
 - each criterion ID in the spec has exactly one test,
 - every one of those tests fails on an assertion, not on an error thrown before one,
 - the RED commit changes only acceptance test files.
@@ -99,13 +99,13 @@ The agent also confirms that:
 - the pull request body cites the issue and, for slices, the spec path,
 - every commit has `Agent:` and `Issue:` trailers, and each commit's files are inside that agent's write scope,
 - every earlier gate has a valid pass for the current commit,
-- `factory/scripts/check.ts` passes.
+- `chrysalis/scripts/check.ts` passes.
 
 The agent blocks on any spec-axis finding, a missing link, a write-scope violation, or a breach of a documented standard. It reports code smells without blocking.
 
 ## Automated checks
 
-`factory/scripts/check.ts` runs these checks. Phase 4 of the factory plan builds the script.
+`chrysalis/scripts/check.ts` runs these checks. Phase 4 of the factory plan builds the script.
 
 1. The branch or pull request cites an issue, and slice work cites a spec path.
 2. The spec is unchanged since the approved commit SHA.
@@ -116,4 +116,4 @@ The agent blocks on any spec-axis finding, a missing link, a write-scope violati
 7. Each gate's latest verdict is a pass that is still valid for the current commit.
 8. Every `TODO` comment cites an issue.
 9. A pull request changes either the factory or one app.
-10. For factory changes, the generated tool files match `factory/agents/`.
+10. For factory changes, the generated tool files match `chrysalis/agents/`.

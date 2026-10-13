@@ -10,7 +10,7 @@ Each app has one tracker, named in its `app.yaml`. Agents reach every tracker th
 
 ## The tracker CLI
 
-Phase 3 of the factory plan builds `bun factory/scripts/tracker.ts`. Every command takes `--app <app>` and `--agent <agent name>`. Factory issues use `--app factory`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON.
+Phase 3 of the factory plan builds `bun chrysalis/scripts/tracker.ts`. Every command takes `--app <app>` and `--agent <agent name>`. Factory issues use `--app factory`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON.
 
 | Command | Does | Who may run it |
 |---|---|---|

@@ -5,7 +5,7 @@ date: 2026-10-11
 
 # 0015. JabStack is the default stack, in TypeScript throughout
 
-New apps default to JabStack. SvelteKit serves both the frontend and the backend, in TypeScript, with Postgres on Neon, Drizzle, Better Auth, and Playwright. Neon replaces Turso. The pending stack changes are in `factory/docs/planning/jabstack-changes.md`.
+New apps default to JabStack. SvelteKit serves both the frontend and the backend, in TypeScript, with Postgres on Neon, Drizzle, Better Auth, and Playwright. Neon replaces Turso. The pending stack changes are in `chrysalis/docs/planning/jabstack-changes.md`.
 
 SvelteKit's generated route types fail the frontend's typecheck when a load function's return value changes. SvelteKit also refuses to bundle `$lib/server` code into the browser. Together with write scopes based on file patterns, that gives agents layer boundaries that tools enforce, without a second language.
 

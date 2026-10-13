@@ -4,10 +4,10 @@ Parts of this repository are copied or adapted from the projects below. Each ski
 
 | Factory file | Source | Use |
 |---|---|---|
-| `factory/skills/unslop/SKILL.md` | pstack, `pstack/skills/unslop/SKILL.md` at commit `978ca6e9c0e012047cd5058b8e829240336e704e` | Copied. Frontmatter changed. |
-| `factory/templates/agent-brief.md` | pstack, `pstack/skills/poteto-mode/playbooks/orchestrate.md` | Brief fields adapted. |
-| `factory/templates/adr.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/ADR-FORMAT.md` | Format adapted. |
-| `factory/templates/glossary.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/GLOSSARY-FORMAT.md` | Format adapted. |
+| `chrysalis/skills/unslop/SKILL.md` | pstack, `pstack/skills/unslop/SKILL.md` at commit `978ca6e9c0e012047cd5058b8e829240336e704e` | Copied. Frontmatter changed. |
+| `chrysalis/templates/agent-brief.md` | pstack, `pstack/skills/poteto-mode/playbooks/orchestrate.md` | Brief fields adapted. |
+| `chrysalis/templates/adr.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/ADR-FORMAT.md` | Format adapted. |
+| `chrysalis/templates/glossary.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/GLOSSARY-FORMAT.md` | Format adapted. |
 
 ## pstack
 
