@@ -15,7 +15,6 @@ These questions are waiting on a decision or a check. Each has an ID so other do
 | Q-11 | Are the model IDs in `chrysalis/models.yaml` right in each tool? | Before phase 4 | Drafted from each tool's docs. The Kilo IDs match Kilo Gateway's public catalog. None is confirmed in the tool itself. |
 | Q-12 | Can each tool offer the factory-maintainer as a selectable primary agent? | Check in phase 4 | Start maintainer sessions with the `factory:` prefix in every tool. Kilo switches agents with Tab. The Kiro CLI has a `chat.defaultAgent` setting, and the Kiro IDE has none. Claude Code starts one with `claude --agent factory-maintainer`. Cursor is unknown. |
 | Q-13 | Can each tool hide subagents from the user's menu? | Check in phase 4 | Kilo can, with `hidden: true`. Kiro's docs describe no way to. Cursor and Claude Code are unknown. |
-| Q-15 | Which license does Chrysalis use? | Before the repository goes public | None. The repository is private, so all rights are reserved. |
 | Q-16 | How does Kiro enforce a write allowlist? A write that no rule matches prompts the user instead of being denied. | Phase 4 | Generate a deny rule that matches every path and excludes the agent's write scope, then test it. |
 | Q-17 | Should Kiro use Claude Opus 5.5 and GPT-5.6, which Kiro lists as experimental? | After the pilot | Yes. Fall back to Claude Opus 5 if Opus 5.5 changes or is withdrawn. |
 | Q-18 | How do Cursor's gate agents post verdicts? Cursor's read-only mode blocks commands that change state, and the local tracker commits each comment. | Phase 4 | Generate Cursor's gate agents without the read-only flag, and rely on `check.ts`, which fails any commit by an agent whose write scope is empty. |
@@ -31,3 +30,4 @@ These questions are waiting on a decision or a check. Each has an ID so other do
 | Q-06 | Which tracker does the factory itself use? | Local markdown. Local is also the default for new apps until the human picks another at app setup. | 0010 |
 | Q-07 | Which language do factory scripts use? | Bun and TypeScript. | 0016 |
 | Q-14 | Should local tracker issues live on a `backlog` branch checked out as a worktree? | Yes. | 0011 |
+| Q-15 | Which license does Chrysalis use? | MIT. | 0023 |
