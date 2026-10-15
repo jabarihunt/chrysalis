@@ -51,7 +51,7 @@ When the TPM can't cite what a reported bug breaks, the request is a feature or 
 
 ## App setup
 
-1. The TPM runs `git remote get-url origin`. If `origin` is the public template, `jabarihunt/chrysalis`, the TPM stops and points the human to the README's steps for making a copy, because apps live in copies under [factory ADR 0024](../docs/adr/0024-public-template-and-private-copies.md). Otherwise the TPM asks the human for the app's name, a one-sentence description, its stack, and its tracker. The defaults are the `jabstack` stack and the `local` tracker.
+1. The TPM runs `git remote get-url origin`. If `origin` is the public template, `jabarihunt/chrysalis`, the TPM stops and points the human to the README's steps for making a copy, because apps live in copies under [factory ADR 0024](../docs/adr/0024-public-template-and-snapshot-copies.md). The stop has no exceptions. Otherwise the TPM asks the human for the app's name, a one-sentence description, its stack, and its tracker. The defaults are the `jabstack` stack and the `local` tracker.
 2. The TPM runs the app setup script. The script creates the `<app>/setup` branch, copies the stack template into `apps/<app>/` without the template's agent instruction files, and writes `app.yaml` with `spec_approval: criteria`.
 3. The TPM creates a `setup` issue in the app's tracker with status `approved`.
 4. The TPM interviews the human about the product, its users, and its constraints, and records the answers on the issue.

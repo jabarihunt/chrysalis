@@ -66,7 +66,8 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 - Each issue is one file at `backlog/<app>/NNNN-<slug>.md`, numbered from `0001` within each app.
 - The file has YAML frontmatter with the fields above, then the body from its template, then a `## Comments` section. Each comment is a `###` heading with the comment's header line, followed by the comment.
 - Each CLI write commits to `backlog` with `Agent:` and `Issue:` trailers.
-- The CLI creates the `backlog` branch and its worktree the first time it runs. It creates `backlog` as an orphan branch with no upstream, even when a remote has a `backlog` branch. A copy cloned from the template may hold `template/backlog`, and starting from it would give the copy the template's issues and a remote to push its own to. See [factory ADR 0026](../docs/adr/0026-factory-changes-move-between-copy-and-template-through-git.md).
+- The CLI creates the `backlog` branch and its worktree the first time it runs. If `origin` has a `backlog` branch, the CLI checks it out. Otherwise it creates `backlog` as an orphan branch, which holds only issue files.
+- Each repository has its own backlog. The template's backlog holds the template's own factory issues, and a copy's backlog starts empty. See [factory ADR 0024](../docs/adr/0024-public-template-and-snapshot-copies.md).
 
 ```markdown
 ---

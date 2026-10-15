@@ -10,46 +10,25 @@ Chrysalis is a draft. Phase 1 wrote the workflow and templates, and phase 2 wrot
 
 ## Making your own copy
 
-This repository is a template. It holds the factory and no apps, and app setup refuses to run in it. To build apps, make your own copy, which can be private. Use a clone rather than GitHub's "Use this template" button, so your copy shares this repository's history and can take factory updates with `git merge`.
+This repository is a template, never a working project. It holds the factory and no apps, and app setup refuses to run in it. To build apps, make your own copy, which can be private.
 
-1. Create an empty repository on GitHub, with no README or license.
-2. Clone this repository, keep it as a remote named `template`, and push to yours:
+Your copy is a snapshot. It has no link back to this repository. You change its factory through your own `factory:` sessions, and changes made here later don't reach it.
+
+1. On this repository's GitHub page, choose Use this template, then Create a new repository. Leave Include all branches unticked, so your copy gets only `master` and none of this repository's factory issues. Or run:
 
    ```sh
-   git clone https://github.com/jabarihunt/chrysalis.git my-factory
-   cd my-factory
-   git remote rename origin template
-   git remote add origin git@github.com:<you>/<your-repo>.git
-   git push -u origin master
+   gh repo create <your-repo> --private --template jabarihunt/chrysalis --clone
    ```
 
-3. Protect `master`. In your repository's settings, open Rulesets, choose New ruleset, then Import a ruleset, and pick `.github/rulesets/protect-master.json`. Or run `gh api -X POST repos/<you>/<your-repo>/rulesets --input .github/rulesets/protect-master.json`. A private repository needs GitHub Pro or Team for rulesets.
+2. Protect `master`. In your copy's settings, open Rulesets, choose New ruleset, then Import a ruleset, and pick `.github/rulesets/protect-master.json`. Or run this from your copy's folder:
 
-Fork this repository only to send changes back. A fork of a public repository stays public, so apps built in one are public too.
+   ```sh
+   gh api -X POST repos/<you>/<your-repo>/rulesets --input .github/rulesets/protect-master.json
+   ```
 
-### Taking factory updates
+   A private repository needs GitHub Pro or Team for rulesets.
 
-```sh
-git fetch template
-git switch -c factory/template-sync master
-git merge template/master
-git push -u origin factory/template-sync
-```
-
-Then open a pull request in your copy and merge it with a merge commit. Conflicts show up only in factory files you've changed.
-
-### Sending a factory change back
-
-Factory changes in your copy land in their own pull requests, apart from app changes. To send one back, find its merge commit in your copy, then:
-
-```sh
-git fetch template
-git switch -c factory/<slug> template/master
-git cherry-pick -x <merge>^1..<merge>^2
-git push -u template factory/<slug>
-```
-
-Push to your fork instead if you can't write to this repository. Then open a pull request against `jabarihunt/chrysalis` and say which copy the change came from. Never send anything under `apps/`, or your `backlog` branch.
+Build apps in a copy, not a fork. A fork of a public repository stays public, so apps built in one are public too.
 
 ## Starting a session
 
