@@ -51,7 +51,7 @@ When the TPM can't cite what a reported bug breaks, the request is a feature or 
 
 ## App setup
 
-1. The TPM asks the human for the app's name, a one-sentence description, its stack, and its tracker. The defaults are the `jabstack` stack and the `local` tracker.
+1. The TPM runs `git remote get-url origin`. If `origin` is the public template, `jabarihunt/chrysalis`, the TPM stops and points the human to the README's steps for making a copy, because apps live in copies under [factory ADR 0024](../docs/adr/0024-public-template-and-snapshot-copies.md). The stop has no exceptions. Otherwise the TPM asks the human for the app's name, a one-sentence description, its stack, and its tracker. The defaults are the `jabstack` stack and the `local` tracker.
 2. The TPM runs the app setup script. The script creates the `<app>/setup` branch, copies the stack template into `apps/<app>/` without the template's agent instruction files, and writes `app.yaml` with `spec_approval: criteria`.
 3. The TPM creates a `setup` issue in the app's tracker with status `approved`.
 4. The TPM interviews the human about the product, its users, and its constraints, and records the answers on the issue.
@@ -204,7 +204,7 @@ To escalate, the TPM saves the current status in `prior_status`, sets `needs-hum
 
 ## Git
 
-- `master` is the primary branch. Only humans merge into it.
+- `master` is the primary branch. Only humans merge into it, through a pull request merged with a merge commit. The `protect-master` ruleset in `.github/rulesets/protect-master.json` enforces this on GitHub, and [factory ADR 0025](../docs/adr/0025-master-takes-merge-commit-pull-requests.md) explains why squash and rebase merges are off.
 - Branch names are `<app>/<feature>-<NN>` for slices, `<app>/setup` for app setup, and `<app>/<issue number>-<slug>` for small changes, bugs, and docs-only work. Factory work uses `factory/<issue number>-<slug>`.
 - Every commit ends with `Agent:` and `Issue:` trailers.
 - Agents never rebase, force-push, open pull requests, or merge. If a branch needs changes from `master`, the TPM asks the human.

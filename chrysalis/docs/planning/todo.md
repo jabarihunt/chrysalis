@@ -4,16 +4,16 @@ This is agreed work that hasn't started. Phase numbers refer to the factory impl
 
 | Item | Owner | When |
 |---|---|---|
-| Run `gh auth login`. `gh` 2.102.0 is installed but not logged in. | Human | Before agents use the GitHub tracker |
 | If an agent session uses JabStack's Stripe MCP entry, switch it to OAuth or a sandbox Agent API key. Stripe MCP stops accepting full-access secret keys on 2026-10-31. Apps that call Stripe through the SDK aren't affected. | Human | Before 2026-10-31 |
 | Confirm the drafted model IDs in `chrysalis/models.yaml`: the Cursor model picker, `kilo models`, and `/model` in Kiro and in Claude Code. Set `confirmed: true` for each one that matches, and check whether your Claude plan includes Fable. | Human, or an agent in each tool | Before phase 4 |
 | Phase 3. Write the skills the agent files list: acceptance-testing, blast-radius, briefing, code-review, diagnosing-bugs, domain-modeling, engineering-principles, implement-slice, interviewing, regression-testing, retro, security-review as a stub marked TODO, slicing, spec-writing, tdd, technical-writing, upstream-sync, and writing-for-agents. Pin upstream commits in `chrysalis/UPSTREAM.md`, and update `THIRD_PARTY_NOTICES.md`. | Agent | After phase 2 |
-| Phase 3. Build the tracker CLI with the local and GitHub adapters, including `--body-file -`, and create the `backlog` branch. | Agent | After phase 2 |
+| Phase 3. Build the tracker CLI with the local and GitHub adapters, including `--body-file -` and the `backlog` branch setup. Test the GitHub adapter against a fake `gh`. `chrysalis/workflow/tracker.md` has the rules for both. | Agent | After phase 2 |
 | Phase 4. Write the JabStack stack profile in `chrysalis/stacks/jabstack/`. It defines the `stack:database`, `stack:backend`, and `stack:frontend` write-scope patterns and the `stack` command group. | Agent | After phase 3 |
-| Phase 4. Write the generator for `.cursor/agents/`, `.kilo/agents/`, `.kiro/agents/`, `.kiro/hooks/`, `.claude/agents/`, and `.claude/settings.json`, the app setup script, and `check.ts`. | Agent | After phase 3 |
-| Phase 5. Run a pilot app in `evals/` through one feature end to end, and fix what breaks. | Agent and human | After phase 4 |
+| Phase 4. Write the generator for `.cursor/agents/`, `.kilo/agents/`, `.kiro/agents/`, `.kiro/hooks/`, `.claude/agents/`, and `.claude/settings.json`, the app setup script, and `check.ts`. The app setup script's tests run it end to end in a temporary folder. The generated deny rules cover the whole always-denied list in `chrysalis/templates/agent.md`, which includes `gh api`, not only `gh pr merge`. | Agent | After phase 3 |
+| Phase 5. Build `evals/`, with a sample product and canned requests, and a runner that tests a factory change against them. The runner never calls app setup and never writes to `apps/`. The first run takes one feature through every agent and gate, with canned answers for the human's approvals, and runs the gates in Claude Code and in one other tool for Q-20. | Agent | After phase 4 |
+| Release. Before the template is ready for copies, the human's first feature in their own copy has merged, and the fixes it called for are in the template. The factory's `backlog` holds no issues, and `chrysalis/docs/planning/` is deleted. | Human and the factory-maintainer | After phase 5 |
 | Write the security-review skill content. | Human and an agent | Security session, Q-05 |
 | Work through `jabstack-changes.md`. | Human and an agent | Stack session |
-| File the JabStack changes as issues in `jabarihunt/jabstack`. | Agent, after the human approves | After `gh auth login` |
+| File the JabStack changes as issues in `jabarihunt/jabstack`. | Agent, after the human approves | After the stack session |
 | Write a Linear tracker adapter. | Agent | When an app needs Linear |
 | Move these todos and `open-questions.md` into the factory's tracker, then delete both files. | Factory-maintainer | When the tracker CLI exists |

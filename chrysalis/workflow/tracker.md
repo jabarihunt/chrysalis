@@ -66,7 +66,8 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 - Each issue is one file at `backlog/<app>/NNNN-<slug>.md`, numbered from `0001` within each app.
 - The file has YAML frontmatter with the fields above, then the body from its template, then a `## Comments` section. Each comment is a `###` heading with the comment's header line, followed by the comment.
 - Each CLI write commits to `backlog` with `Agent:` and `Issue:` trailers.
-- The CLI creates the `backlog` branch and its worktree the first time it runs.
+- The CLI creates the `backlog` branch and its worktree the first time it runs. If `origin` has a `backlog` branch, the CLI checks it out. Otherwise it creates `backlog` as an orphan branch, which holds only issue files.
+- Each repository has its own backlog. The template's backlog holds the template's own factory issues, and a copy's backlog starts empty. See [factory ADR 0024](../docs/adr/0024-public-template-and-snapshot-copies.md).
 
 ```markdown
 ---
@@ -99,3 +100,4 @@ The test agent committed five failing acceptance tests, one per criterion, in 8d
 - The other fields live in a YAML block at the top of the issue body, and the CLI rewrites that block on `link`.
 - Slice issues are native sub-issues of their request issue.
 - `close` closes the issue as completed for `done` and as not planned for `cancelled`.
+- The adapter's tests run against a fake `gh` that records each call and returns canned output. No test calls GitHub.

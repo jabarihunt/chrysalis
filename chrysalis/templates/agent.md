@@ -25,7 +25,7 @@ Frontmatter fields:
   - stack:<layer> stands for the file patterns the app's stack profile lists for that layer, such as stack:backend.
   - root-files stands for any file directly in the repository root.
 - shell. Command groups the agent may run. Every agent may also read files and search them.
-  - git-read: git status, diff, log, show, rev-parse, and branch --list.
+  - git-read: git status, diff, log, show, rev-parse, branch --list, and remote get-url.
   - git-write: git switch, add, commit, and push of the agent's own work branch.
   - tracker: bun chrysalis/scripts/tracker.ts.
   - checks: bun chrysalis/scripts/check.ts.
@@ -34,7 +34,7 @@ Frontmatter fields:
   - factory-scripts: any script in chrysalis/scripts/, and bun test.
 - skills. Paths to the SKILL.md files the agent reads before it starts.
 
-Every agent is denied these commands, whatever its shell groups: gh pr create, gh pr merge, gh pr review, git push to master, git push --force, git rebase, git reset --hard, and git branch -D.
+Every agent is denied these commands, whatever its shell groups: gh api, gh pr create, gh pr merge, gh pr review, git push to master, git push --force, git rebase, git reset --hard, and git branch -D. gh api is denied whole, reads included. The -f, -F, and --input flags switch it to POST without -X, and GraphQL mutations run through it too, so a rule can't reliably tell its reads from its writes. The tracker CLI calls gh inside its own process, so the deny doesn't affect it.
 
 Body sections, in this order. Keep each agent-specific, and link to chrysalis/workflow/ instead of restating it.
 -->
