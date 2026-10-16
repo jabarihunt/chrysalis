@@ -51,7 +51,7 @@ When the TPM can't cite what a reported bug breaks, the request is a feature or 
 
 ## App setup
 
-1. The TPM runs `git remote get-url origin`. If `origin` is the public template, `jabarihunt/chrysalis`, the TPM stops and points the human to the README's steps for making a copy, because apps live in copies under [factory ADR 0024](../docs/adr/0024-public-template-and-snapshot-copies.md). The stop has no exceptions. Otherwise the TPM asks the human for the app's name, a one-sentence description, its stack, and its tracker. The defaults are the `jabstack` stack and the `local` tracker.
+1. The TPM runs `git remote get-url origin`. If `origin` is the public template, `jabarihunt/chrysalis`, the TPM stops and points the human to the README's steps for making a copy, because apps live in copies under [factory ADR 0024](../docs/adr/0024-public-template-and-snapshot-copies.md). The stop has no exceptions. Otherwise the TPM asks the human for the app's name, a one-sentence description, its stack, and its tracker. The defaults are the `jabstack` stack and the `local` tracker. The name can't be `factory`, which [the tracker reserves](tracker.md#the-factory-app) for the factory's own issues.
 2. The TPM runs the app setup script. The script creates the `<app>/setup` branch, copies the stack template into `apps/<app>/` without the template's agent instruction files, and writes `app.yaml` with `spec_approval: criteria`.
 3. The TPM creates a `setup` issue in the app's tracker with status `approved`.
 4. The TPM interviews the human about the product, its users, and its constraints, and records the answers on the issue.
@@ -132,7 +132,7 @@ flowchart TD
 
 ## Statuses
 
-Only the TPM changes statuses, with one exception. A gate agent sets `blocked` when it blocks, and clears it when it passes on a rerun.
+Only the TPM changes statuses, with one exception. A gate agent sets `blocked` when it blocks, and clears it when it passes on a rerun. For factory issues, the factory-maintainer takes the TPM's part. The tracker CLI enforces these rules, as [the tracker's status rules](tracker.md#status-rules) describe.
 
 | Status | Kinds | Meaning |
 |---|---|---|
@@ -140,9 +140,9 @@ Only the TPM changes statuses, with one exception. A gate agent sets `blocked` w
 | `cut-review` | request | The cut is waiting for the human's approval. |
 | `in-progress` | request | The feature's slices are running. |
 | `criteria-review` | small-change | The criteria are waiting for the human's approval. |
-| `approved` | setup, slice, small-change, bug, docs | Approved. The first step, such as RED, is under way. |
+| `approved` | setup, slice, small-change, bug, docs, factory | Approved. The first step, such as RED, is under way. A factory issue in this status is agreed work that hasn't started. |
 | `red` | slice, small-change, bug | Failing acceptance or regression tests are committed and passed the RED review. |
-| `implementing` | slice, small-change, bug | Implementers are working. |
+| `implementing` | slice, small-change, bug, factory | Implementers are working, or the factory-maintainer is. |
 | `security-review` | setup, slice, small-change, bug | The security gate is running. |
 | `test-review` | setup, slice, small-change, bug | The test gate is running. |
 | `docs` | setup, slice, small-change, bug, docs | The documentation agent is working. |

@@ -1,4 +1,4 @@
-<!-- Work issue template for kinds "setup", "slice", "small-change", "bug", and "docs". Keep the section for this issue's kind and delete the others. The tracker holds the fields such as status, spec, spec_sha, red_sha, and branch. Delete these comments. -->
+<!-- Work issue template for kinds "setup", "slice", "small-change", "bug", "docs", and "factory". Keep the section for this issue's kind and delete the others. The tracker holds the fields such as status, spec, spec_sha, red_sha, and branch. Delete these comments. -->
 
 ## Slice
 
@@ -48,3 +48,7 @@ Environment: <browser, device, data, or account the bug needs>
 App: <app>
 Stack: <stack profile>
 Tracker: <local or github>
+
+## Factory
+
+<The change to the factory, and why. Name the ADRs, open questions, or todo items it touches.>

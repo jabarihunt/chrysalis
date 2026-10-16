@@ -1,7 +1,8 @@
 # App configuration. The app setup script writes this file at apps/<app>/app.yaml.
 # Change it only at the human's request.
 
-# Folder name under apps/. Lowercase letters, numbers, and hyphens.
+# Folder name under apps/. Lowercase letters, numbers, and hyphens. Not "factory",
+# which the tracker reserves for the factory's own issues.
 name: <app>
 
 # One sentence on what the app does.

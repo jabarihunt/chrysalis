@@ -2,7 +2,15 @@
 
 Chrysalis is an agentic software factory. You bring a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
 
-Chrysalis is a draft. Phase 1 wrote the workflow and templates, and phase 2 wrote the agent files and model classes. The skills, scripts, and evals come in later phases, listed in [the todo list](chrysalis/docs/planning/todo.md).
+Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI. The skills, the other scripts, and evals come next, listed in [the todo list](chrysalis/docs/planning/todo.md).
+
+## Requirements
+
+- Bun 1.2.21 or later, for the factory's scripts.
+- git 2.42 or later.
+- gh 2.94 or later, logged in, for apps that use the GitHub tracker.
+
+The tracker CLI checks these versions when it starts.
 
 ## How it works
 
@@ -50,6 +58,7 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `apps/` | One folder per app, created by app setup. The template has none. |
 | `chrysalis/agents/` | One file per agent, with its role, write scope, skills, and model class |
 | `chrysalis/models.yaml` | The model each model class uses in each tool |
+| `chrysalis/scripts/` | The tracker CLI and its tests. Run the tests with `bun test chrysalis/scripts`. |
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
 | `chrysalis/templates/` | Templates for specs, issues, briefs, and verdicts |
 | `chrysalis/skills/` | Skills the agents read |
