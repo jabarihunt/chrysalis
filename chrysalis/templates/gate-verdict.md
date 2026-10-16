@@ -1,6 +1,4 @@
-<!-- Gate verdict template. Gate agents post this as a "verdict" comment through the tracker CLI. The header line comes first. Delete these comments. -->
-
-verdict from <agent> at <ISO 8601 time>
+<!-- Gate verdict template. Gate agents post this as a "verdict" comment through the tracker CLI, which writes the header line. Delete these comments. -->
 
 Gate: <red-review, security, test, or code-review>
 Verdict: <pass or block>

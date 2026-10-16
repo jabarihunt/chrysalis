@@ -10,44 +10,74 @@ Each app has one tracker, named in its `app.yaml`. Agents reach every tracker th
 
 ## The tracker CLI
 
-Phase 3 of the factory plan builds `bun chrysalis/scripts/tracker.ts`. Every command takes `--app <app>` and `--agent <agent name>`. Factory issues use `--app factory`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON. `--body-file -` reads the body from standard input, so agents with no write scope, such as the TPM and the gate agents, can create issues and post comments without writing a file.
+`bun chrysalis/scripts/tracker.ts` is the tracker CLI. Every command takes `--app <app>` and `--agent <agent name>`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON on standard output. On an error, it prints `{"error": "..."}` on standard error and exits with code 1, or with code 2 for bad usage. `--body-file -` reads the body from standard input, so agents with no write scope, such as the TPM and the gate agents, can create issues and post comments without writing a file.
+
+When it starts, the CLI checks the tool versions that [the README](../../README.md#requirements) lists. It checks `gh` only for the GitHub tracker.
 
 | Command | Does | Who may run it |
 |---|---|---|
-| `create --kind <kind> --title <title> --body-file <path or -> [--parent <ref>]` | Creates an issue and prints its reference | TPM |
+| `create --kind <kind> --title <title> --body-file <path or -> [--parent <ref>]` | Creates an issue and prints it | TPM |
 | `show <ref>` | Prints the issue's fields, body, and comments | Any agent |
 | `list [--status <status>] [--kind <kind>]` | Lists issues | Any agent |
-| `comment <ref> --type <type> --body-file <path or ->` | Adds a comment | Any agent |
-| `set <ref> --status <status>` | Changes the status | TPM. Gate agents may set `blocked` and clear their own block. |
-| `link <ref> --field <field> --value <value>` | Sets a field such as `spec`, `spec_sha`, `red_sha`, `branch`, or `pr` | TPM |
+| `comment <ref> --type <type> --body-file <path or ->` | Adds a comment | Any agent, for the types in [Comment types](#comment-types) |
+| `set <ref> --status <status> [--gate <gate>]` | Changes the status | TPM. A gate agent sets `blocked` with `--gate`, and clears its own block. See [Status rules](#status-rules). |
+| `link <ref> --field <field> --value <value>` | Sets `spec`, `spec_sha`, `red_sha`, `branch`, or `pr`. `--value none` clears the field. | TPM |
 | `close <ref> --status <done or cancelled>` | Sets the final status and closes the issue | TPM |
 
-The CLI has no command that opens, approves, or merges a pull request. No command deletes an issue or a comment.
+The CLI checks the last column against `--agent`. It has no command that opens, approves, or merges a pull request, and no command deletes an issue or a comment.
+
+## The factory app
+
+- `factory` is a reserved app name for the factory's own issues. The CLI always uses the local tracker for it and reads no `app.yaml`.
+- App setup refuses an app named `factory`, and the CLI stops if `apps/factory/` exists.
+- Factory issues have kind `factory`, which no other app uses. They start at `approved`, and the factory-maintainer moves them through `implementing`, `ready-for-pr`, and `ready-to-merge` to `done`. [The pipeline's statuses](pipeline.md#statuses) list every status they can hold.
+- For factory issues, the factory-maintainer runs every command and posts every comment type that this file gives the TPM.
+
+## Status rules
+
+The CLI enforces these rules, and it allows each status only for the kinds [the pipeline](pipeline.md#statuses) lists.
+
+- `create` sets the first status from the kind: `intake` for a request, `criteria-review` for a small change, and `approved` for every other kind.
+- A slice needs `--parent`, the request issue it belongs to. No other kind takes a parent.
+- A gate agent sets `blocked` only while its gate runs, and names the gate with `--gate`. The CLI fills `blocked_by` and adds one to that gate's count in `blocks`.
+- Only the gate that blocked can clear the block. It clears it by setting the status in the last column below.
+
+| Gate | Run by | Status while it runs, and after its block clears |
+|---|---|---|
+| `red-review` | Code review agent | `approved` |
+| `security` | Security agent | `security-review` |
+| `test` | Test agent | `test-review` |
+| `code-review` | Code review agent | `code-review` |
+
+- The TPM never sets `blocked` and never lifts a block. From `blocked`, it can only escalate.
+- Setting `needs-human` saves the current status in `prior_status`. Leaving `needs-human` returns the issue to that status.
+- `done` and `cancelled` come only from `close`. An issue that's `blocked` or `needs-human` can close as `cancelled` but not as `done`.
+- A closed issue takes comments, such as the retro, but no other change.
 
 ## References
 
-An issue reference is `<app>#<number>`, as in `todo#12` or `factory#3`. The number counts up from 1 within each app.
+An issue reference is `<app>#<number>`, as in `todo#12` or `factory#3`. With the local tracker, the number counts up from 1 within each app. With the GitHub tracker, the number is the GitHub issue number, so it counts up across every app that shares the repository.
 
 ## Fields
 
 | Field | Holds |
 |---|---|
-| `kind` | `request`, `setup`, `slice`, `small-change`, `bug`, or `docs` |
-| `title` | A short name for the work |
+| `kind` | `request`, `setup`, `slice`, `small-change`, `bug`, or `docs`. Factory issues use `factory`. |
+| `title` | A short name for the work, on one line |
 | `status` | One of the statuses in [the pipeline](pipeline.md#statuses) |
 | `parent` | The request issue, for slice issues |
-| `spec` | The slice spec's path |
+| `spec` | The slice spec's path, relative to the repository root |
 | `spec_sha` | The commit SHA of the approved spec |
 | `red_sha` | The commit SHA of the RED commit that passed the RED review |
 | `branch` | The work branch |
-| `pr` | The pull request link, once the human opens it |
+| `pr` | The pull request's https link, once the human opens it |
 | `blocked_by` | The gate that blocked, while the status is `blocked` |
 | `blocks` | The number of blocks per gate, such as `security: 1` |
 | `prior_status` | The status to return to, while the status is `needs-human` |
 
 ## Comment types
 
-Every comment starts with a header line in the form `<type> from <agent> at <ISO 8601 time>`.
+Every comment starts with a header line in the form `<type> from <agent> at <ISO 8601 time>`. The CLI writes the header, so the body you pass leaves it out. A body or comment can't contain a `## Comments` line or a line that looks like a comment header, because the local tracker's file format uses both.
 
 | Type | Posted by | Holds |
 |---|---|---|
@@ -65,7 +95,8 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 - The separate branch keeps issue status independent of the code branch that's checked out. If issue files lived on code branches, a slice's status would exist only on its own branch until merge.
 - Each issue is one file at `backlog/<app>/NNNN-<slug>.md`, numbered from `0001` within each app.
 - The file has YAML frontmatter with the fields above, then the body from its template, then a `## Comments` section. Each comment is a `###` heading with the comment's header line, followed by the comment.
-- Each CLI write commits to `backlog` with `Agent:` and `Issue:` trailers.
+- Each CLI write commits only the issue's file to `backlog`, with `Agent:` and `Issue:` trailers. If the commit fails, the CLI puts the file back as it was.
+- The CLI never pushes. The human pushes `backlog` when they want it on the remote.
 - The CLI creates the `backlog` branch and its worktree the first time it runs. If `origin` has a `backlog` branch, the CLI checks it out. Otherwise it creates `backlog` as an orphan branch, which holds only issue files.
 - Each repository has its own backlog. The template's backlog holds the template's own factory issues, and a copy's backlog starts empty. See [factory ADR 0024](../docs/adr/0024-public-template-and-snapshot-copies.md).
 
@@ -85,6 +116,13 @@ blocks: {}
 prior_status: none
 ---
 
+## Slice
+
+Spec: apps/todo/docs/features/due-dates/slices/01-set-due-date.md
+Request: todo#4
+
+A user can set a due date on a task.
+
 ## Comments
 
 ### report from tpm at 2026-10-12T15:04:00Z
@@ -94,10 +132,12 @@ The test agent committed five failing acceptance tests, one per criterion, in 8d
 
 ## GitHub adapter
 
-- The adapter uses the `gh` CLI, logged in as the human. Sub-issues need `gh` 2.94 or later.
+- The adapter uses the `gh` CLI, logged in as the human.
 - Issues live in the repository named in `app.yaml` under `tracker.repo`. The default is the `origin` remote of this repository.
-- Labels carry the app, kind, and status, as in `app:todo`, `kind:slice`, and `status:red`. `set` swaps the status label.
-- The other fields live in a YAML block at the top of the issue body, and the CLI rewrites that block on `link`.
+- Labels carry the app, kind, and status, as in `app:todo`, `kind:slice`, and `status:red`. `set` swaps the status label, and the CLI creates any label the repository lacks.
+- The other fields live in a fenced YAML block at the top of the issue body, which starts with `# Tracker fields`. The CLI rewrites that block on `set` and `link`, and leaves the rest of the body alone. It refuses issues without the block, because the CLI didn't create them.
 - Slice issues are native sub-issues of their request issue.
 - `close` closes the issue as completed for `done` and as not planned for `cancelled`.
-- The adapter's tests run against a fake `gh` that records each call and returns canned output. No test calls GitHub.
+- `show` leaves out comments from accounts that can't write to the repository, and counts them in `dropped_comments`. Anyone can comment on a public repository's issues, and without this rule those comments would reach agents.
+- A comment written in the browser has no header line, so `show` gives it a `type` and an `agent` of null.
+- The adapter's tests run against a fake `gh` that records each call and keeps its issues in a scratch file. No test calls GitHub.
