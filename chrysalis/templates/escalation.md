@@ -1,6 +1,4 @@
-<!-- Escalation template. The TPM posts this as an "escalation" comment, then asks the human the same question in chat. Delete these comments. -->
-
-escalation from tpm at <ISO 8601 time>
+<!-- Escalation template. The TPM posts this as an "escalation" comment through the tracker CLI, which writes the header line, then asks the human the same question in chat. Delete these comments. -->
 
 Issue: <app>#<n>, paused at `<prior status>`
 Blocked: <one sentence on what can't move until the human decides>
