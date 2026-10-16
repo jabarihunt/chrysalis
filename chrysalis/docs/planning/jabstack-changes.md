@@ -1,6 +1,6 @@
 # JabStack changes
 
-These are changes to make to [JabStack](https://github.com/jabarihunt/jabstack) during the stack session. They come from the factory planning sessions of October 2026. JabStack stays TypeScript, with SvelteKit serving both the frontend and the backend, and Better Auth stays inside the app. See ADRs 0015 and 0019. Open stack decisions are in `open-questions.md` as Q-03 and Q-04.
+These are changes to make to [JabStack](https://github.com/jabarihunt/jabstack) during the stack session. They come from the factory planning sessions of October 2026. JabStack stays TypeScript, with SvelteKit serving both the frontend and the backend, and Better Auth stays inside the app. See ADRs 0015 and 0019. Open stack decisions are Q-03 and Q-04 in the factory's tracker.
 
 ## Decided
 
