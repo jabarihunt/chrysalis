@@ -62,6 +62,7 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
 | `chrysalis/templates/` | Templates for specs, issues, briefs, and verdicts |
 | `chrysalis/skills/` | Skills the agents read |
+| `chrysalis/UPSTREAM.md` | The upstream commits the skills and templates were checked against |
 | `chrysalis/docs/adr/` | Decisions about the factory, and why they were made |
 | `chrysalis/docs/planning/` | The initial outline and the JabStack change notes, deleted at release |
 

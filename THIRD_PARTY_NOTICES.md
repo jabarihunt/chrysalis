@@ -1,10 +1,17 @@
 # Third-party notices
 
-Parts of this repository are copied or adapted from the projects below. Each skill or template that uses upstream material names its source in its frontmatter or opening comment.
+Parts of this repository are copied or adapted from the projects below. Each skill or template that uses upstream material names its source in its frontmatter or opening comment, and [chrysalis/UPSTREAM.md](chrysalis/UPSTREAM.md) pins the upstream commits.
 
 | Factory file | Source | Use |
 |---|---|---|
-| `chrysalis/skills/unslop/SKILL.md` | pstack, `pstack/skills/unslop/SKILL.md` at commit `978ca6e9c0e012047cd5058b8e829240336e704e` | Copied. Frontmatter changed. |
+| `chrysalis/skills/unslop/SKILL.md` | pstack, `pstack/skills/unslop/SKILL.md` | Copied. Frontmatter changed. |
+| `chrysalis/skills/spec-writing/SKILL.md` | Matt Pocock's skills, `skills/engineering/to-spec/SKILL.md` and `skills/engineering/triage/AGENT-BRIEF.md` | Seam choice, writing from settled material, and durable, testable specs adapted. |
+| `chrysalis/skills/slicing/SKILL.md` | Matt Pocock's skills, `skills/engineering/to-tickets/SKILL.md`, and pstack, `pstack/skills/principle-sequence-verifiable-units/SKILL.md` | Vertical slices, blocking edges, prefactoring, and ordering slices so each can be checked adapted. |
+| `chrysalis/skills/domain-modeling/SKILL.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/SKILL.md`, `ADR-FORMAT.md`, and `GLOSSARY-FORMAT.md` in that folder | Term checks, glossary upkeep, and the kinds of decision that deserve an ADR adapted. |
+| `chrysalis/skills/interviewing/SKILL.md` | Matt Pocock's skills, `skills/productivity/grilling/SKILL.md` and `skills/engineering/grill-with-docs/SKILL.md` | The decision tree, rounds with recommended answers, and recording answers as they come adapted. |
+| `chrysalis/skills/briefing/SKILL.md` | pstack, `pstack/skills/poteto-mode/playbooks/orchestrate.md`, and Matt Pocock's skills, `skills/engineering/triage/AGENT-BRIEF.md` and `skills/productivity/handoff/SKILL.md` | Brief fields, relaying reports in full, and behavioral, scoped briefs adapted. |
+| `chrysalis/skills/writing-for-agents/SKILL.md` | Matt Pocock's skills, `skills/productivity/writing-for-agents/SKILL.md` and `SKILL-MECHANICS.md` in that folder | Pointers, the depth of each piece, completion checks, positive wording, and pruning adapted. |
+| `chrysalis/skills/technical-writing/SKILL.md` | pstack, `pstack/skills/technical-writing/SKILL.md`, and Matt Pocock's skills, `skills/engineering/pr/SKILL.md` | Document modes, sentence rules, and the pull request body as a briefing adapted. |
 | `chrysalis/templates/agent-brief.md` | pstack, `pstack/skills/poteto-mode/playbooks/orchestrate.md` | Brief fields adapted. |
 | `chrysalis/templates/adr.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/ADR-FORMAT.md` | Format adapted. |
 | `chrysalis/templates/glossary.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/GLOSSARY-FORMAT.md` | Format adapted. |
