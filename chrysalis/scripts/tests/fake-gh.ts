@@ -1,6 +1,7 @@
-// A fake gh for the GitHub adapter's tests. It keeps one repository's labels and issues in the JSON
-// file named by FAKE_GH_STATE, appends each call's arguments to FAKE_GH_LOG, and supports only the gh
-// commands the adapter runs. No call reaches GitHub.
+// A fake gh for the tracker's tests. It keeps one repository's labels, issues, pull requests, and
+// commit statuses in the JSON file named by FAKE_GH_STATE, appends each call's arguments to
+// FAKE_GH_LOG, and supports only the gh commands that the GitHub adapter and pr-verdict run. No call
+// reaches GitHub.
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 
 export type FakeComment = { author: { login: string }; authorAssociation: string; viewerDidAuthor: boolean; body: string; createdAt: string };
@@ -14,18 +15,31 @@ export type FakeIssue = {
   comments: FakeComment[];
   parent: number | null;
 };
-export type FakeState = { viewer: string; labels: string[]; next: number; issues: FakeIssue[] };
+export type FakePrComment = { body: string; url: string; viewerDidAuthor: boolean };
+export type FakePr = { number: number; state: "OPEN" | "CLOSED" | "MERGED"; headRefOid: string; comments: FakePrComment[] };
+export type FakeStatus = { sha: string; state: string; context: string; description: string; target_url: string };
+export type FakeState = {
+  viewer: string;
+  labels: string[];
+  next: number;
+  issues: FakeIssue[];
+  prs: FakePr[];
+  statuses: FakeStatus[];
+  /** When true, the statuses API fails, as a network error would. */
+  failStatuses?: boolean;
+};
 
 export function emptyState(): FakeState {
-  return { viewer: "owner", labels: [], next: 1, issues: [] };
+  return { viewer: "owner", labels: [], next: 1, issues: [], prs: [], statuses: [] };
 }
 
+/** Every flag in the calls this fake supports takes a value, as in --repo owner/name or -f key=value. */
 function parse(args: string[]) {
   const words: string[] = [];
   const flags: Record<string, string[]> = {};
   for (let i = 0; i < args.length; i++) {
-    if (args[i].startsWith("--")) {
-      (flags[args[i].slice(2)] ??= []).push(args[i + 1]);
+    if (args[i].startsWith("-")) {
+      (flags[args[i].replace(/^-+/, "")] ??= []).push(args[i + 1]);
       i++;
     } else {
       words.push(args[i]);
@@ -50,8 +64,40 @@ function main(): number {
     return 1;
   };
   const stdin = () => readFileSync(0, "utf8");
+
+  // gh api repos/<owner>/<repo>/statuses/<sha> --method POST -f state=... -f context=...
+  if (words[0] === "api") {
+    const match = words[1]?.match(/^repos\/[^/]+\/[^/]+\/statuses\/([0-9a-f]{40})$/);
+    if (one("method") !== "POST" || !match) return fail(`fake gh: unsupported api call ${args.join(" ")}`);
+    if (state.failStatuses) return fail("Post \"https://api.github.com/repos/x/statuses\": dial tcp: lookup api.github.com: no such host");
+    const fields = Object.fromEntries((flags.f ?? []).map((kv) => [kv.slice(0, kv.indexOf("=")), kv.slice(kv.indexOf("=") + 1)]));
+    state.statuses.push({ sha: match[1], state: fields.state, context: fields.context, description: fields.description, target_url: fields.target_url });
+    save();
+    console.log(JSON.stringify({ state: fields.state, context: fields.context }));
+    return 0;
+  }
+
   const repo = one("repo");
   if (!repo) return fail("fake gh: every call needs --repo");
+
+  if (words[0] === "pr") {
+    const pr = state.prs.find((p) => p.number === Number(words[2]));
+    if (!pr) return fail(`GraphQL: Could not resolve to a PullRequest with the number of ${words[2]}. (repository.pullRequest)`);
+    const prUrl = `https://github.com/${repo}/pull/${pr.number}`;
+    if (words[1] === "view") {
+      const all: Record<string, unknown> = { number: pr.number, state: pr.state, headRefOid: pr.headRefOid, url: prUrl, comments: pr.comments };
+      console.log(JSON.stringify(Object.fromEntries(one("json")!.split(",").map((f) => [f, all[f]]))));
+      return 0;
+    }
+    if (words[1] === "comment") {
+      const commentUrl = `${prUrl}#issuecomment-${1001 + pr.comments.length}`;
+      pr.comments.push({ body: stdin(), url: commentUrl, viewerDidAuthor: true });
+      save();
+      console.log(commentUrl);
+      return 0;
+    }
+    return fail(`fake gh: unsupported command ${words.join(" ")}`);
+  }
   const url = (n: number) => `https://github.com/${repo}/issues/${n}`;
   const find = (n: string) => state.issues.find((i) => i.number === Number(n));
   const missingLabel = (names: string[]) => names.find((l) => !state.labels.includes(l));

@@ -12,7 +12,7 @@ Each app has one tracker, named in its `app.yaml`. Agents reach every tracker th
 
 `bun chrysalis/scripts/tracker.ts` is the tracker CLI. Every command takes `--app <app>` and `--agent <agent name>`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON on standard output. On an error, it prints `{"error": "..."}` on standard error and exits with code 1, or with code 2 for bad usage. `--body-file -` reads the body from standard input, so agents with no write scope, such as the TPM and the gate agents, can create issues and post comments without writing a file.
 
-When it starts, the CLI checks the tool versions that [the README](../../README.md#requirements) lists. It checks `gh` only for the GitHub tracker.
+When it starts, the CLI checks the tool versions that [the README](../../README.md#requirements) lists. It checks `gh` for the GitHub tracker, and for `pr-verdict` whatever the tracker.
 
 | Command | Does | Who may run it |
 |---|---|---|
@@ -23,8 +23,9 @@ When it starts, the CLI checks the tool versions that [the README](../../README.
 | `set <ref> --status <status> [--gate <gate>]` | Changes the status | TPM. A gate agent sets `blocked` with `--gate`, and clears its own block. See [Status rules](#status-rules). |
 | `link <ref> --field <field> --value <value>` | Sets `spec`, `spec_sha`, `red_sha`, `branch`, or `pr`. `--value none` clears the field. | TPM |
 | `close <ref> --status <done or cancelled>` | Sets the final status and closes the issue | TPM |
+| `pr-verdict <ref> --body-file <path or ->` | Posts the code review verdict on the issue's pull request and sets its commit status. See [Code review verdicts](#code-review-verdicts). | Code review agent |
 
-The CLI checks the last column against `--agent`. It has no command that opens, approves, or merges a pull request, and no command deletes an issue or a comment.
+The CLI checks the last column against `--agent`. Its one pull request command, `pr-verdict`, only comments and sets a commit status. It has no command that opens, approves, or merges a pull request, and no command deletes an issue or a comment.
 
 ## The factory app
 
@@ -51,6 +52,7 @@ The CLI enforces these rules, and it allows each status only for the kinds [the 
 | `code-review` | Code review agent | `code-review` |
 
 - The TPM never sets `blocked` and never lifts a block. From `blocked`, it can only escalate.
+- The TPM sets `code-review` only once the issue links a pull request. A repository with no remote is the exception, because no pull request can exist there.
 - Setting `needs-human` saves the current status in `prior_status`. Leaving `needs-human` returns the issue to that status.
 - `done` and `cancelled` come only from `close`. An issue that's `blocked` or `needs-human` can close as `cancelled` but not as `done`.
 - A closed issue takes comments, such as the retro, but no other change.
@@ -71,7 +73,7 @@ An issue reference is `<app>#<number>`, as in `todo#12` or `factory#3`. With the
 | `spec_sha` | The commit SHA of the approved spec |
 | `red_sha` | The commit SHA of the RED commit that passed the RED review |
 | `branch` | The work branch |
-| `pr` | The pull request's https link, once the human opens it |
+| `pr` | The pull request's GitHub URL, such as `https://github.com/owner/repo/pull/12`, once the human opens it. `link` refuses any other URL. |
 | `blocked_by` | The gate that blocked, while the status is `blocked` |
 | `blocks` | The number of blocks per gate, such as `security: 1` |
 | `prior_status` | The status to return to, while the status is `needs-human` |
@@ -82,13 +84,25 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 
 | Type | Posted by | Holds |
 |---|---|---|
-| `report` | TPM, after each agent run | A summary of the agent's report |
+| `report` | TPM, after each agent run | A summary of the agent's report. After a code review run, only a link to the verdict on the pull request. |
 | `question` | Any agent | One question and who should answer it |
 | `answer` | The agent that answered, or the TPM relaying the human | The answer, quoting the question |
-| `verdict` | Gate agents | A [gate verdict](../templates/gate-verdict.md) |
+| `verdict` | Gate agents | A [gate verdict](../templates/gate-verdict.md). The CLI refuses one without the template's `Gate:`, `Verdict:`, and `Commit:` lines, or from an agent that doesn't run that gate. Code review verdicts go on the pull request instead, as [Code review verdicts](#code-review-verdicts) describes. |
 | `escalation` | TPM | An [escalation](../templates/escalation.md) |
 | `decision` | TPM | A human decision or approval in the human's words, with any commit SHA it covers |
-| `retro` | TPM, after merge | What blocked, what the human corrected, and what an agent got wrong |
+| `retro` | TPM, after merge | What blocked, what the human corrected, and what an agent got wrong. A code review block gets a link to its verdict on the pull request instead of its findings. |
+
+## Code review verdicts
+
+The code review gate posts its verdict on the pull request, and the issue keeps no copy. [Factory ADR 0026](../docs/adr/0026-code-review-verdicts-go-on-the-pull-request.md) explains why. `pr-verdict` posts it for the code review agent:
+
+- It runs only while the code review gate runs, which means status `code-review` or the gate's own block, and only for a verdict with `Gate: code-review`.
+- It reads the pull request from the issue's `pr` field. It refuses a pull request that isn't open, and a verdict whose `Commit:` line isn't the pull request's head commit.
+- It posts the verdict as a pull request comment that starts with the same header line as an issue comment. Then it sets the `chrysalis/code-review` commit status on the head commit, `success` for a pass and `failure` for a block, linked to the comment.
+- When the newest verdict comment that this account posted for the code review agent already holds the same verdict, it reuses that comment instead of posting another. A retry after a failed status call then adds no second comment.
+- It prints the pull request, the commit, the status, `comment_url`, and `reused_comment`, and it changes nothing on the issue.
+
+In a repository with a remote, `comment --type verdict` refuses a code review verdict. In a repository with no remote, an issue with no `pr` link takes the code review verdict as a `verdict` comment, the same way the other gates post theirs.
 
 ## Local adapter
 

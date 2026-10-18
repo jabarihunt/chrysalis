@@ -110,6 +110,14 @@ const fail = (message: string): never => {
   throw new TrackerError(message);
 };
 
+/** Facts about the repository that the rules depend on. The CLI reads them from git. */
+export type RepoFacts = {
+  /** Whether git lists a remote. With one, a pull request can exist, so code review verdicts go on it. */
+  hasRemote: boolean;
+};
+/** The strict default, for callers that don't pass the facts. */
+const WITH_REMOTE: RepoFacts = { hasRemote: true };
+
 // ---- Names and references ----
 
 const APP_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -120,6 +128,13 @@ export function checkAppName(app: string): void {
 
 export function makeRef(app: string, number: number): string {
   return `${app}#${number}`;
+}
+
+/** Reads a GitHub pull request URL, such as https://github.com/owner/repo/pull/12. */
+export function parsePrUrl(url: string): { repo: string; number: number; url: string } | null {
+  const match = url.trim().match(/^https:\/\/github\.com\/([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)\/pull\/([1-9][0-9]*)\/?$/);
+  if (!match) return null;
+  return { repo: match[1], number: Number(match[2]), url: `https://github.com/${match[1]}/pull/${match[2]}` };
 }
 
 export function parseRef(ref: string, app: string): number {
@@ -207,7 +222,7 @@ export function planCreate(
 
 export type Change = { status?: Status; fields?: Partial<Fields> };
 
-export function planSet(issue: Issue, agent: string, target: string, gate: string | null): Change {
+export function planSet(issue: Issue, agent: string, target: string, gate: string | null, repo: RepoFacts = WITH_REMOTE): Change {
   const to = target as Status;
   if (!STATUS_NAMES.includes(to)) fail(`Unknown status "${target}". Statuses: ${STATUS_NAMES.join(", ")}.`);
   if (FINAL_STATUSES.includes(issue.status)) fail(`${issue.ref} is closed as ${issue.status}.`);
@@ -241,6 +256,9 @@ export function planSet(issue: Issue, agent: string, target: string, gate: strin
 
   if (agent !== manager) return fail(`Only ${manager} changes statuses for app "${issue.app}", apart from gate agents' blocks.`);
   if (gate) fail("--gate is for gate agents.");
+  if (to === "code-review" && !issue.pr && repo.hasRemote) {
+    fail(`${issue.ref} links no pull request. Link it with link --field pr before you set code-review, so the code review verdict goes on the pull request.`);
+  }
   if (issue.status === "needs-human") {
     if (to !== issue.prior_status) fail(`${issue.ref} returns from needs-human to its prior status, ${issue.prior_status}.`);
     return { status: to, fields: { prior_status: null } };
@@ -266,8 +284,12 @@ export function planLink(issue: Issue, agent: string, field: string, value: stri
   if (!v || v.includes("\n")) fail("The value must be one non-empty line, or none to clear the field.");
   if ((name === "spec_sha" || name === "red_sha") && !SHA.test(v)) fail(`${name} takes a commit SHA of 7 to 40 lowercase hex characters. Got "${v}".`);
   if (name === "branch" && !BRANCH.test(v)) fail(`"${v}" isn't a valid branch name.`);
-  if (name === "pr" && !/^https:\/\/\S+$/.test(v)) fail(`pr takes the pull request's https URL. Got "${v}".`);
   if (name === "spec" && (v.startsWith("/") || v.includes(".."))) fail(`spec takes a path relative to the repository root. Got "${v}".`);
+  if (name === "pr") {
+    const pr = parsePrUrl(v);
+    if (!pr) return fail(`pr takes a GitHub pull request URL, such as https://github.com/owner/repo/pull/12. Got "${v}".`);
+    return { fields: { pr: pr.url } };
+  }
   return { fields: { [name]: v } };
 }
 
@@ -282,7 +304,7 @@ export function planClose(issue: Issue, agent: string, target: string): Change {
   return { status: to };
 }
 
-export function planComment(issue: Issue, agent: string, type: string, body: string): { type: CommentType; body: string } {
+export function planComment(issue: Issue, agent: string, type: string, body: string, repo: RepoFacts = WITH_REMOTE): { type: CommentType; body: string } {
   const t = type as CommentType;
   if (!COMMENT_TYPE_NAMES.includes(t)) fail(`Unknown comment type "${type}". Types: ${COMMENT_TYPE_NAMES.join(", ")}.`);
   const who = COMMENT_TYPES[t];
@@ -290,7 +312,50 @@ export function planComment(issue: Issue, agent: string, type: string, body: str
   if (who === "gate" && !isGateAgent(agent)) fail(`Only gate agents post verdict comments. This run is --agent ${agent}.`);
   if (!body.trim()) fail("The comment can't be empty.");
   checkBody(body, "comment");
+  if (t === "verdict") {
+    const verdict = parseVerdict(body);
+    if (GATES[verdict.gate].agent !== agent) fail(`The ${verdict.gate} gate is run by ${GATES[verdict.gate].agent}, not ${agent}.`);
+    // Code review results stay off the issue while a pull request can exist. See factory ADR 0026.
+    if (verdict.gate === "code-review" && issue.pr) {
+      fail(`${issue.ref} links the pull request ${issue.pr}, so post the code review verdict there with pr-verdict.`);
+    }
+    if (verdict.gate === "code-review" && repo.hasRemote) {
+      fail(`This repository has a remote, so the code review verdict goes on the pull request with pr-verdict, not on ${issue.ref}. The TPM links the pull request with link --field pr.`);
+    }
+  }
   return { type: t, body: body.trim() };
+}
+
+// ---- Verdicts ----
+
+export type Verdict = { gate: Gate; verdict: "pass" | "block"; commit: string };
+
+/** Reads the Gate, Verdict, and Commit lines of a body written from the gate verdict template. */
+export function parseVerdict(body: string): Verdict {
+  const line = (name: string) => body.match(new RegExp(`^${name}:[ \\t]*(\\S.*?)[ \\t]*$`, "m"))?.[1] ?? null;
+  const gate = line("Gate") as Gate | null;
+  const verdict = line("Verdict");
+  const commit = line("Commit");
+  if (!gate || !GATE_NAMES.includes(gate)) fail(`A verdict needs a "Gate:" line naming one of ${GATE_NAMES.join(", ")}, as the gate verdict template shows.`);
+  if (verdict !== "pass" && verdict !== "block") fail(`A verdict needs a "Verdict:" line that says pass or block.`);
+  if (!commit || !SHA.test(commit)) fail(`A verdict needs a "Commit:" line with the SHA it checked, 7 to 40 lowercase hex characters.`);
+  return { gate: gate!, verdict: verdict as "pass" | "block", commit: commit! };
+}
+
+/** The code review gate posts its verdict on the issue's pull request. See factory ADR 0026. */
+export function planPrVerdict(issue: Issue, agent: string, body: string): Verdict & { body: string } {
+  const gateAgent = GATES["code-review"].agent;
+  if (agent !== gateAgent) fail(`Only ${gateAgent} posts code review verdicts. This run is --agent ${agent}.`);
+  const running = issue.status === "code-review" || (issue.status === "blocked" && issue.blocked_by === "code-review");
+  if (!running) fail(`${issue.ref} is ${issue.status}. The code review gate runs while the status is code-review, or while its own block stands.`);
+  if (!issue.pr) {
+    fail(`${issue.ref} has no pull request link. The TPM links it with link --field pr. Only a repository with no remote takes the code review verdict on the issue, with comment --type verdict.`);
+  }
+  if (!body.trim()) fail("The verdict can't be empty.");
+  checkBody(body, "verdict");
+  const verdict = parseVerdict(body);
+  if (verdict.gate !== "code-review") fail(`pr-verdict posts only code review verdicts. The ${verdict.gate} gate posts on the issue with comment --type verdict.`);
+  return { ...verdict, body: body.trim() };
 }
 
 export function applyChange(issue: Issue, change: Change): Issue {

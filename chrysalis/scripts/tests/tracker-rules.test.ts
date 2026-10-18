@@ -2,7 +2,7 @@
 import { describe, expect, test } from "bun:test";
 import { composeBody, parseRepoUrl, splitBody } from "../lib/tracker/github";
 import { formatIssueFile, parseIssueFile, slugify } from "../lib/tracker/local";
-import { TrackerError, applyChange, checkBody, emptyFields, planClose, planComment, planCreate, planLink, planSet } from "../lib/tracker/rules";
+import { TrackerError, applyChange, checkBody, emptyFields, parsePrUrl, parseVerdict, planClose, planComment, planCreate, planLink, planPrVerdict, planSet } from "../lib/tracker/rules";
 import type { Issue, Kind, Status } from "../lib/tracker/rules";
 import { yamlScalar } from "../lib/tracker/yaml-fields";
 
@@ -106,6 +106,16 @@ describe("planSet", () => {
     expect(err(() => planSet(issue(), "backend", "red", null))).toContain("Only tpm changes statuses");
   });
 
+  test("the TPM sets code-review only once a pull request is linked, unless the repository has no remote", () => {
+    const ready = issue({ status: "ready-for-pr" });
+    expect(err(() => planSet(ready, "tpm", "code-review", null, { hasRemote: true }))).toContain("links no pull request");
+    expect(err(() => planSet(ready, "tpm", "code-review", null))).toContain("links no pull request");
+    expect(planSet(issue({ status: "ready-for-pr", pr: "https://github.com/acme/todo/pull/7" }), "tpm", "code-review", null, { hasRemote: true }).status).toBe("code-review");
+    expect(planSet(ready, "tpm", "code-review", null, { hasRemote: false }).status).toBe("code-review");
+    const escalated = issue({ status: "needs-human", prior_status: "code-review" });
+    expect(err(() => planSet(escalated, "tpm", "code-review", null, { hasRemote: true }))).toContain("links no pull request");
+  });
+
   test("factory issues follow the factory-maintainer", () => {
     const f = issue({ app: "factory", ref: "factory#1", kind: "factory" });
     expect(applyChange(f, planSet(f, "factory-maintainer", "implementing", null)).status).toBe("implementing");
@@ -119,7 +129,11 @@ describe("planLink, planClose, and planComment", () => {
     expect(planLink(issue(), "tpm", "spec_sha", "3f2a9c1").fields).toEqual({ spec_sha: "3f2a9c1" });
     expect(planLink(issue(), "tpm", "branch", "none").fields).toEqual({ branch: null });
     expect(err(() => planLink(issue(), "tpm", "spec_sha", "XYZ"))).toContain("commit SHA");
-    expect(err(() => planLink(issue(), "tpm", "pr", "http://x"))).toContain("https URL");
+    expect(planLink(issue(), "tpm", "pr", "https://github.com/acme/todo/pull/7/").fields).toEqual({ pr: "https://github.com/acme/todo/pull/7" });
+    expect(planLink(issue(), "tpm", "pr", "none").fields).toEqual({ pr: null });
+    for (const url of ["http://x", "https://github.com/acme/todo/issues/7", "https://gitlab.com/acme/todo/-/merge_requests/7", "https://github.com/acme/todo/pull/7#issuecomment-1"]) {
+      expect(err(() => planLink(issue(), "tpm", "pr", url))).toContain("GitHub pull request URL");
+    }
     expect(err(() => planLink(issue(), "tpm", "spec", "../etc"))).toContain("relative to the repository root");
     expect(err(() => planLink(issue(), "tpm", "status", "red"))).toContain("link sets one of");
     expect(err(() => planLink(issue(), "spec-writer", "spec", "a.md"))).toContain("Only tpm");
@@ -135,12 +149,51 @@ describe("planLink, planClose, and planComment", () => {
 
   test("comment types follow the Posted by column", () => {
     expect(planComment(issue(), "backend", "question", "Why?").type).toBe("question");
-    expect(planComment(issue(), "test", "verdict", "Gate: test").type).toBe("verdict");
+    expect(planComment(issue(), "test", "verdict", "Gate: test\nVerdict: pass\nCommit: 1234567").type).toBe("verdict");
     expect(err(() => planComment(issue(), "backend", "verdict", "x"))).toContain("Only gate agents");
     expect(err(() => planComment(issue(), "backend", "report", "x"))).toContain("Only tpm");
     expect(planComment(issue({ status: "done" }), "tpm", "retro", "What blocked").type).toBe("retro");
     expect(err(() => planComment(issue(), "tpm", "note", "x"))).toContain("Unknown comment type");
     expect(err(() => planComment(issue(), "tpm", "report", "  "))).toContain("empty");
+  });
+});
+
+describe("verdicts", () => {
+  const body = (gate: string, verdict = "pass", commit = "3f2a9c1") => `Gate: ${gate}\nVerdict: ${verdict}\nCommit: ${commit}\nRange: master...HEAD\n\n## Findings\n\nNone`;
+
+  test("reads the Gate, Verdict, and Commit lines of the template", () => {
+    expect(parseVerdict(body("security", "block"))).toEqual({ gate: "security", verdict: "block", commit: "3f2a9c1" });
+    expect(err(() => parseVerdict("Verdict: pass\nCommit: 3f2a9c1"))).toContain('"Gate:" line');
+    expect(err(() => parseVerdict(body("security", "maybe")))).toContain('"Verdict:" line');
+    expect(err(() => parseVerdict(body("security", "pass", "HEAD")))).toContain('"Commit:" line');
+    expect(err(() => parseVerdict("Gate: <red-review, security, test, or code-review>\nVerdict: pass\nCommit: 3f2a9c1"))).toContain('"Gate:" line');
+  });
+
+  test("a verdict comment comes from the agent that runs its gate", () => {
+    expect(planComment(issue(), "code-review", "verdict", body("red-review")).type).toBe("verdict");
+    expect(err(() => planComment(issue(), "security", "verdict", body("test")))).toContain("run by test, not security");
+  });
+
+  test("a code review verdict goes on the issue only in a repository with no remote and no linked pull request", () => {
+    const running = issue({ status: "code-review" });
+    expect(planComment(running, "code-review", "verdict", body("code-review"), { hasRemote: false }).type).toBe("verdict");
+    expect(err(() => planComment(running, "code-review", "verdict", body("code-review"), { hasRemote: true }))).toContain("has a remote");
+    expect(err(() => planComment(running, "code-review", "verdict", body("code-review")))).toContain("has a remote");
+    const withPr = issue({ status: "code-review", pr: "https://github.com/acme/todo/pull/7" });
+    expect(err(() => planComment(withPr, "code-review", "verdict", body("code-review"), { hasRemote: false }))).toContain("with pr-verdict");
+    expect(planComment(running, "code-review", "verdict", body("red-review"), { hasRemote: true }).type).toBe("verdict");
+  });
+
+  test("pr-verdict takes only code review verdicts, from the code review agent, while the gate runs", () => {
+    const ready = issue({ status: "code-review", pr: "https://github.com/acme/todo/pull/7" });
+    expect(planPrVerdict(ready, "code-review", body("code-review", "block"))).toMatchObject({ gate: "code-review", verdict: "block", commit: "3f2a9c1" });
+    const ownBlock = issue({ status: "blocked", blocked_by: "code-review", pr: ready.pr });
+    expect(planPrVerdict(ownBlock, "code-review", body("code-review")).verdict).toBe("pass");
+    expect(err(() => planPrVerdict(ready, "test", body("code-review")))).toContain("Only code-review posts");
+    expect(err(() => planPrVerdict(issue({ status: "test-review", pr: ready.pr }), "code-review", body("code-review")))).toContain("is test-review");
+    expect(err(() => planPrVerdict(issue({ status: "blocked", blocked_by: "test", pr: ready.pr }), "code-review", body("code-review")))).toContain("is blocked");
+    expect(err(() => planPrVerdict(issue({ status: "code-review" }), "code-review", body("code-review")))).toContain("no pull request link");
+    expect(err(() => planPrVerdict(ready, "code-review", body("red-review")))).toContain("only code review verdicts");
   });
 });
 
@@ -188,6 +241,14 @@ describe("bodies and formats", () => {
     expect(splitBody(body, "x")).toEqual({ fields, body: "## Slice\n\nThe body." });
     expect(splitBody(body.replace(/\n/g, "\r\n"), "x").fields).toEqual(fields);
     expect(err(() => splitBody("Written by hand.", "acme/w#9"))).toContain("didn't create it");
+  });
+
+  test("reads GitHub pull request URLs", () => {
+    expect(parsePrUrl("https://github.com/acme/my.site/pull/12")).toEqual({ repo: "acme/my.site", number: 12, url: "https://github.com/acme/my.site/pull/12" });
+    expect(parsePrUrl(" https://github.com/acme/todo/pull/7/\n")?.url).toBe("https://github.com/acme/todo/pull/7");
+    expect(parsePrUrl("https://github.com/acme/todo/pull/0")).toBeNull();
+    expect(parsePrUrl("https://github.com/acme/todo/pull/7/files")).toBeNull();
+    expect(parsePrUrl("https://github.com.evil.example/acme/todo/pull/7")).toBeNull();
   });
 
   test("reads GitHub repositories from origin URLs", () => {

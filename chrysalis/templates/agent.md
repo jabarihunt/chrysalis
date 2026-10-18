@@ -31,7 +31,7 @@ Frontmatter fields:
   - checks: bun chrysalis/scripts/check.ts.
   - stack: the stack profile's install, run, test, typecheck, lint, build, audit, and migration commands.
   - app-setup: bun chrysalis/scripts/app-setup.ts.
-  - factory-scripts: any script in chrysalis/scripts/, and bun test.
+  - factory-scripts: any script in chrysalis/scripts/, bun test, bun install --cwd chrysalis/scripts, and bun run --cwd chrysalis/scripts typecheck.
 - skills. Paths to the SKILL.md files the agent reads before it starts.
 
 Every agent is denied these commands, whatever its shell groups: gh api, gh pr create, gh pr merge, gh pr review, git push to master, git push --force, git rebase, git reset --hard, and git branch -D. gh api is denied whole, reads included. The -f, -F, and --input flags switch it to POST without -X, and GraphQL mutations run through it too, so a rule can't reliably tell its reads from its writes. The tracker CLI calls gh inside its own process, so the deny doesn't affect it.

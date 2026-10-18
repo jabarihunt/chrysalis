@@ -153,7 +153,7 @@ describe("issues", () => {
     for (const status of ["red", "implementing", "security-review"]) await tracker(repo, ["set", "todo#1", ...T, "--status", status]);
     const blocked = await tracker(repo, ["set", "todo#1", "--app", "todo", "--agent", "security", "--status", "blocked", "--gate", "security"]);
     expect(blocked.json).toMatchObject({ status: "blocked", blocked_by: "security", blocks: { security: 1 } });
-    const verdict = await tracker(repo, ["comment", "todo#1", "--app", "todo", "--agent", "security", "--type", "verdict", "--body-file", "-"], { input: "Gate: security\nVerdict: block" });
+    const verdict = await tracker(repo, ["comment", "todo#1", "--app", "todo", "--agent", "security", "--type", "verdict", "--body-file", "-"], { input: "Gate: security\nVerdict: block\nCommit: 1234567" });
     expect(verdict.json.comments[0].type).toBe("verdict");
     const lift = await tracker(repo, ["set", "todo#1", ...T, "--status", "test-review"]);
     expect(lift.error).toContain("Only the security gate can clear its block");

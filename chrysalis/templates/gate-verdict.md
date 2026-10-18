@@ -1,8 +1,8 @@
-<!-- Gate verdict template. Gate agents post this as a "verdict" comment through the tracker CLI, which writes the header line. Delete these comments. -->
+<!-- Gate verdict template. Gate agents post it through the tracker CLI, which writes the header line. The code review gate posts it on the pull request with pr-verdict. The other gates post it as a "verdict" comment on the issue. The CLI reads the Gate, Verdict, and Commit lines, so keep those three labels as they are. Delete these comments. -->
 
 Gate: <red-review, security, test, or code-review>
 Verdict: <pass or block>
-Commit: <the SHA checked>
+Commit: <the SHA checked. For the code review gate, the pull request's head commit.>
 Range: <the git range reviewed, such as master...HEAD>
 Block count: <blocks at this gate on this issue, including this one, such as 1 of 3>
 Model: <tool and model ID, such as kiro claude-opus-5.5>
