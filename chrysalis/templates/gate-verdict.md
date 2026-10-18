@@ -10,7 +10,7 @@ Same family as the reviewed work: <yes or no. Yes is allowed only in a tool mark
 
 ## Findings
 
-<"None" on a clean pass. On a block, every finding that caused it.>
+<"None" on a clean pass. On a block, every finding that caused it. The code review gate splits this section into "### Spec axis" and "### Standards axis", each with its own table or "None".>
 
 | # | Severity | Where | Finding | Breaks | Fix owner |
 |---|---|---|---|---|---|
@@ -19,3 +19,12 @@ Same family as the reviewed work: <yes or no. Yes is allowed only in a tool mark
 ## Not blocking
 
 <Findings that don't block. The TPM may turn them into issues. "None" if there are none.>
+
+## Checks
+
+<Code review gate only. Delete this section for the other gates.>
+
+- Pull request body: <cites the issue and, for a slice, the spec path, or what it's missing>
+- Commit trailers and write scopes: <every commit passes, or each commit that doesn't and why>
+- Earlier gates: <each earlier gate, its verdict, and the commit its pass covers>
+- check.ts: <passed, or each failing check>

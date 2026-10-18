@@ -16,7 +16,7 @@ async function gh(args: string[], input?: string): Promise<string> {
   return result.stdout;
 }
 
-/** The newest verdict comment that this account posted for the agent, with its body after the header. */
+/** The agent's newest verdict comment from the account gh is logged in as, with its body after the header. */
 export function latestVerdictComment(comments: PrComment[], agent: string): { body: string; url: string | null } | null {
   for (let i = comments.length - 1; i >= 0; i--) {
     const comment = comments[i]!;

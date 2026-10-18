@@ -99,7 +99,7 @@ The code review gate posts its verdict on the pull request, and the issue keeps 
 - It runs only while the code review gate runs, which means status `code-review` or the gate's own block, and only for a verdict with `Gate: code-review`.
 - It reads the pull request from the issue's `pr` field. It refuses a pull request that isn't open, and a verdict whose `Commit:` line isn't the pull request's head commit.
 - It posts the verdict as a pull request comment that starts with the same header line as an issue comment. Then it sets the `chrysalis/code-review` commit status on the head commit, `success` for a pass and `failure` for a block, linked to the comment.
-- When the newest verdict comment that this account posted for the code review agent already holds the same verdict, it reuses that comment instead of posting another. A retry after a failed status call then adds no second comment.
+- When the code review agent's newest verdict comment, posted from the account `gh` is logged in as, already holds the same verdict, it reuses that comment instead of posting another. A retry after a failed status call then adds no second comment.
 - It prints the pull request, the commit, the status, `comment_url`, and `reused_comment`, and it changes nothing on the issue.
 
 In a repository with a remote, `comment --type verdict` refuses a code review verdict. In a repository with no remote, an issue with no `pr` link takes the code review verdict as a `verdict` comment, the same way the other gates post theirs.

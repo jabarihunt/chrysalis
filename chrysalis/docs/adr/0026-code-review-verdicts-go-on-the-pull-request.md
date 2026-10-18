@@ -5,7 +5,7 @@ date: 2026-10-18
 
 # 0026. Code review verdicts go on the pull request
 
-The code review gate runs after the human opens the pull request, so its verdict goes on the pull request, where the human reviews and merges. The tracker CLI's `pr-verdict` command posts the verdict as a comment on the issue's pull request. It also sets a commit status named `chrysalis/code-review` on the pull request's head commit, `success` for a pass and `failure` for a block. The issue holds no copy of the verdict and no summary of its findings. The RED review and the security and test gates run before a pull request exists, so their verdicts stay on the issue.
+The code review gate runs after the human opens the pull request, so its verdict goes on the pull request, where the human reviews and merges. The tracker CLI's `pr-verdict` command posts the verdict as a comment on the issue's pull request, and that comment holds the whole review: both axes, the checks, and the findings that don't block. It also sets a commit status named `chrysalis/code-review` on the pull request's head commit, `success` for a pass and `failure` for a block. The issue holds no copy of the verdict and no summary of its findings. The RED review and the security and test gates run before a pull request exists, so their verdicts stay on the issue.
 
 A code review verdict goes on the issue only in a repository with no remote, where no pull request can exist. With a remote, the CLI refuses a code review verdict on the issue, and it refuses the `code-review` status until the issue links a pull request. The `pr` field takes only GitHub pull request URLs.
 
