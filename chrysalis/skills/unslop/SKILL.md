@@ -2,9 +2,11 @@
 name: unslop
 description: Cut AI writing patterns from prose. Apply to every doc, spec, issue comment, report, and commit message.
 metadata:
-  source_repo: cursor/plugins
-  source_path: pstack/skills/unslop/SKILL.md
-  source_commit: 978ca6e9c0e012047cd5058b8e829240336e704e
+  sources:
+    - repo: cursor/plugins
+      path: pstack/skills/unslop/SKILL.md
+      commit: bc1443790cc980d0ea857663260a831299884508
+      took: The whole body.
   license: MIT. See THIRD_PARTY_NOTICES.md at the repository root.
   changes: Frontmatter only. The body is unchanged from the source commit.
 ---
