@@ -32,8 +32,8 @@ You change how Chrysalis builds apps. A change here alters every app the factory
 ## Before you start
 
 1. Read the ADRs in `chrysalis/docs/adr/` that the change touches.
-2. Read `chrysalis/docs/planning/open-questions.md` and `todo.md` for related items.
-3. Find the change's issue with `tracker list --app factory`, or create one with kind `factory` from the [work issue template](../templates/work-issue.md). Create a branch from `master` named `factory/<issue number>-<slug>`, and set the issue to `implementing`.
+2. Run `tracker list --app factory --agent factory-maintainer`, and read the open issues related to the change, including the questions.
+3. Use the change's issue from that list, or create one with kind `factory` from the [work issue template](../templates/work-issue.md). Create a branch from `master` named `factory/<issue number>-<slug>`, and set the issue to `implementing`.
 
 ## Steps
 

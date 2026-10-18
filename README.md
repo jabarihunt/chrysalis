@@ -2,7 +2,7 @@
 
 Chrysalis is an agentic software factory. You bring a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
 
-Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI. The skills, the other scripts, and evals come next, listed in [the todo list](chrysalis/docs/planning/todo.md).
+Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI. The skills, the other scripts, and evals come next, tracked as factory issues in the local tracker.
 
 ## Requirements
 
@@ -63,7 +63,7 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `chrysalis/templates/` | Templates for specs, issues, briefs, and verdicts |
 | `chrysalis/skills/` | Skills the agents read |
 | `chrysalis/docs/adr/` | Decisions about the factory, and why they were made |
-| `chrysalis/docs/planning/` | Open questions, todos, and planning notes |
+| `chrysalis/docs/planning/` | The initial outline and the JabStack change notes, deleted at release |
 
 ## License and credits
 

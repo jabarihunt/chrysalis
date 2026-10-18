@@ -32,6 +32,7 @@ The CLI checks the last column against `--agent`. It has no command that opens, 
 - App setup refuses an app named `factory`, and the CLI stops if `apps/factory/` exists.
 - Factory issues have kind `factory`, which no other app uses. They start at `approved`, and the factory-maintainer moves them through `implementing`, `ready-for-pr`, and `ready-to-merge` to `done`. [The pipeline's statuses](pipeline.md#statuses) list every status they can hold.
 - For factory issues, the factory-maintainer runs every command and posts every comment type that this file gives the TPM.
+- Open questions are factory issues too. The 20 questions from before the tracker keep their IDs, Q-01 to Q-20, at the start of their titles. New questions get no ID. When a question is settled, record the answer in an ADR, post an `answer` comment that names the ADR, and close the issue as `done`.
 
 ## Status rules
 

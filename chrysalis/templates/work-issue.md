@@ -51,4 +51,4 @@ Tracker: <local or github>
 
 ## Factory
 
-<The change to the factory, and why. Name the ADRs, open questions, or todo items it touches.>
+<The change to the factory, and why. Name the ADRs it touches, and the factory issues by reference or Q-ID.>
