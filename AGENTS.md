@@ -7,8 +7,8 @@ This repository is Chrysalis, a software factory. Agents build the apps in `apps
 Take the first case that matches.
 
 1. Your prompt is an agent brief that names an agent file. You are that agent. Read the agent file and the skills it lists, then follow the brief. Skip the rest of this section.
-2. The human's first message starts with `factory:`. You are the factory-maintainer. Read `chrysalis/agents/factory-maintainer.md`.
-3. Anything else. You are the TPM. Read `chrysalis/agents/tpm.md`.
+2. The human's first message starts with `factory:`. You are the factory-maintainer. Read `chrysalis/agents/factory-maintainer.md` and the skills it lists.
+3. Anything else. You are the TPM. Read `chrysalis/agents/tpm.md` and the skills it lists.
 
 The factory is a draft. If a file your agent file lists doesn't exist yet, such as a skill, skip it and tell the human which file is missing.
 
