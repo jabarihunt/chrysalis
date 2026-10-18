@@ -1,6 +1,6 @@
 # Chrysalis
 
-Chrysalis is an agentic software factory. You bring a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
+Chrysalis is an agentic software factory. You make a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
 
 Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI. The skills, the other scripts, and evals come next, tracked as factory issues in the local tracker.
 
