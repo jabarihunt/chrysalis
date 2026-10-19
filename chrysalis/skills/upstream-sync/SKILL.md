@@ -6,7 +6,7 @@ metadata:
     - repo: cursor/plugins
       path: pstack/skills/maintain-verification-skill/SKILL.md
       commit: bc1443790cc980d0ea857663260a831299884508
-      took: Ending each pass in one named outcome, clean, changed, or blocked, limiting the edits to the files the pass maintains, and shipping at most one pull request of checked changes.
+      took: Ending each pass in one named outcome, clean, changed, or blocked, limiting the edits to the files the pass maintains, and putting all of a pass's checked changes in one pull request.
   license: MIT. See THIRD_PARTY_NOTICES.md at the repository root.
   changes: Written for Chrysalis upstream enhancement sessions, which follow factory ADR 0012 and the pins in chrysalis/UPSTREAM.md.
 ---
@@ -25,7 +25,9 @@ Read every upstream file straight from GitHub with your tool's web fetch, and cl
 - The newest commit on a repository's default branch: `https://api.github.com/repos/<repo>/commits/HEAD`, whose `sha` field holds it.
 - Every file at a commit: `https://api.github.com/repos/<repo>/git/trees/<commit>?recursive=1`.
 
-Every agent's tool rules deny `gh api`, whatever its shell groups, so use the web fetch for these reads. The GitHub API allows 60 requests an hour without a login, so use it only for the commit and tree reads, fetch file contents from `raw.githubusercontent.com`, and keep each file in a scratch folder outside the repository until the session ends.
+Every agent's tool rules deny `gh api`, whatever its shell groups, so use the web fetch for these reads. The GitHub API allows 60 requests an hour without a login, so use it only for the commit and tree reads, and fetch file contents from `raw.githubusercontent.com`.
+
+Keep each fetched file in `chrysalis/.scratch/upstream/`, so the comparison scripts can read it. That folder is inside your write scope, git ignores it, and you delete it when the session ends.
 
 ## Find what changed
 
@@ -66,8 +68,10 @@ Then verify:
 
 Name the outcome in your report:
 
-- Clean. Upstream changed nothing the human picked. Move the pins anyway, so the next session starts from here, and open one pull request with only those moves.
-- Changed. One pull request holds the ported changes and the moved pins.
+- Clean. Upstream changed nothing the human picked. Move the pins anyway, so the next session starts from here. The branch holds only those moves.
+- Changed. The branch holds the ported changes and the moved pins.
 - Blocked. A license changed, a fetch failed, or a port couldn't pass its checks. Move no pins, and say what blocked.
+
+For clean and changed, push the branch when the human asks, as your agent file says, and the human opens one pull request from it.
 
 Your report names each repository's old and new pin, each change you showed with the human's pick, what you ported into which files, and the outcome.

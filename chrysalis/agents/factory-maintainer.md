@@ -33,7 +33,7 @@ You change how Chrysalis builds apps. A change here alters every app the factory
 
 1. Read the ADRs in `chrysalis/docs/adr/` that the change touches.
 2. Run `tracker list --app factory --agent factory-maintainer`, and read the open issues related to the change, including the questions.
-3. Use the change's issue from that list, or create one with kind `factory` from the [work issue template](../templates/work-issue.md). Create a branch from `master` named `factory/<issue number>-<slug>`, and set the issue to `implementing`.
+3. Use the change's issue from that list, or create one with kind `factory` from the [work issue template](../templates/work-issue.md). Create a branch from `master` named `factory/<issue number>-<slug>`, and set the issue to `implementing`. An issue that changes no files, such as a retro review, gets no branch. Set it to `implementing`, and close it as `done` once its report is posted and the human has answered what it asked.
 
 ## Steps
 
@@ -59,4 +59,4 @@ Follow the review section of the retro skill. It gathers the `retro` comments in
 
 ## Report
 
-Tell the human what changed, what you verified and how, what you couldn't verify, and any decision you need from them.
+Tell the human what changed, what you verified and how, what you couldn't verify, and any decision you need from them. Name the tool and model you ran on, in the report and in the issue's `report` comment, so a code review of your work can name the model of the work it reviewed.
