@@ -2,7 +2,7 @@
 
 Chrysalis is an agentic software factory. You make a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
 
-Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI and every skill except the two maintainer skills, with security-review as a stub. Those two skills, the other scripts, and evals come next, tracked as factory issues in the local tracker.
+Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI and every skill, with security-review as a stub. The other scripts and evals come next, tracked as factory issues in the local tracker.
 
 ## Requirements
 
@@ -60,7 +60,7 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `chrysalis/models.yaml` | The model each model class uses in each tool |
 | `chrysalis/scripts/` | The tracker CLI and its tests. Run the tests with `bun test chrysalis/scripts`. For the typecheck, run `bun install --cwd chrysalis/scripts` once, then `bun run --cwd chrysalis/scripts typecheck`. |
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
-| `chrysalis/templates/` | Templates for specs, issues, briefs, and verdicts |
+| `chrysalis/templates/` | Templates for specs, issues, briefs, verdicts, and retros |
 | `chrysalis/skills/` | Skills the agents read |
 | `chrysalis/UPSTREAM.md` | The upstream commits the skills and templates were checked against |
 | `chrysalis/docs/adr/` | Decisions about the factory, and why they were made |

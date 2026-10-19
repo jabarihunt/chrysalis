@@ -46,14 +46,11 @@ You change how Chrysalis builds apps. A change here alters every app the factory
 
 ## Upstream enhancement sessions
 
-1. For each skill, read the source repository, path, and commit in its frontmatter.
-2. Diff each source file from the pinned commit to the latest one, and show the human what changed.
-3. Port only the changes the human picks. Then move the pinned commit in `chrysalis/UPSTREAM.md`, and update `THIRD_PARTY_NOTICES.md`.
+Follow the upstream-sync skill. It compares each pinned upstream file with its latest version, shows the human each change, ports only the changes the human picks, and moves the pins in `chrysalis/UPSTREAM.md`.
 
 ## Retros
 
-1. Read the `retro` comments in each app's tracker since the last review.
-2. When a correction repeats, encode it as a check, a template field, or a script before you add prose to an agent or skill file.
+Follow the review section of the retro skill. It gathers the `retro` comments in each app's tracker since the last review, and fixes each mistake that repeats with a check, a template field, or an eval before it adds prose to an agent or skill file.
 
 ## Rules
 
