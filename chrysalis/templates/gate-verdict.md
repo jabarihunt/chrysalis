@@ -5,8 +5,8 @@ Verdict: <pass or block>
 Commit: <the SHA checked. For the code review gate, the pull request's head commit.>
 Range: <the git range reviewed, such as master...HEAD>
 Block count: <blocks at this gate on this issue, including this one, such as 1 of 3>
-Model: <tool and model ID, such as kiro claude-opus-5.5>
-Same family as the reviewed work: <yes or no. Yes is allowed only in a tool marked single_family in chrysalis/models.yaml.>
+Model: <tool and model ID, such as kiro claude-opus-5.5. When the tool doesn't report its model, copy it from the brief's MODEL field and add "attested in the brief".>
+Same family as the reviewed work: <yes or no, with the reviewed work's model from the brief's MODEL field. Yes is allowed only in a tool marked single_family in chrysalis/models.yaml.>
 
 ## Findings
 
@@ -27,4 +27,4 @@ Same family as the reviewed work: <yes or no. Yes is allowed only in a tool mark
 - Pull request body: <cites the issue and, for a slice, the spec path, or what it's missing>
 - Commit trailers and write scopes: <every commit passes, or each commit that doesn't and why>
 - Earlier gates: <each earlier gate, its verdict, and the commit its pass covers>
-- check.ts: <passed, or each failing check>
+- check.ts: <passed, each failing check, or "not built yet" until check.ts exists>

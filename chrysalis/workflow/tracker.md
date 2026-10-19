@@ -90,7 +90,7 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 | `verdict` | Gate agents | A [gate verdict](../templates/gate-verdict.md). The CLI refuses one without the template's `Gate:`, `Verdict:`, and `Commit:` lines, or from an agent that doesn't run that gate. Code review verdicts go on the pull request instead, as [Code review verdicts](#code-review-verdicts) describes. |
 | `escalation` | TPM | An [escalation](../templates/escalation.md) |
 | `decision` | TPM | A human decision or approval in the human's words, with any commit SHA it covers |
-| `retro` | TPM, after merge | What blocked, what the human corrected, and what an agent got wrong. A code review block gets a link to its verdict on the pull request instead of its findings. |
+| `retro` | TPM, after merge | A [retro](../templates/retro.md): what blocked, what the human corrected, and what an agent got wrong. A code review block gets a link to its verdict on the pull request instead of its findings. |
 
 ## Code review verdicts
 

@@ -16,7 +16,7 @@ A gate decides whether work moves to the next step. Agent gates post a verdict o
 
 - Gate agents post verdicts with the [gate verdict template](../templates/gate-verdict.md). A verdict is `pass` or `block`, and it names the commit SHA it checked. The tracker CLI reads the `Gate:`, `Verdict:`, and `Commit:` lines, and refuses a verdict without them or from an agent that doesn't run that gate.
 - The code review gate posts its verdict on the pull request with `tracker pr-verdict`, which also sets the `chrysalis/code-review` commit status. The verdict holds the whole review, and its commit is the pull request's head commit. Code review results stay off the issue: no verdict, no findings, and no summary of them. In a repository with no remote, no pull request exists, so the verdict goes on the issue. [Factory ADR 0026](../docs/adr/0026-code-review-verdicts-go-on-the-pull-request.md) explains why, and [the tracker guide](tracker.md#code-review-verdicts) describes the command.
-- A verdict names the tool and model it ran on, and whether that model's family matches the family of the work it reviewed. A same-family verdict is allowed only in a tool marked `single_family` in `chrysalis/models.yaml`.
+- A verdict names the tool and model it ran on, and whether that model's family matches the family of the work it reviewed. A same-family verdict is allowed only in a tool marked `single_family` in `chrysalis/models.yaml`. When the tool doesn't tell the agent which model it runs, the agent copies both models from the brief's MODEL field and writes "attested in the brief" after them. TODO(factory#9): Once the generated agent files pin each agent's model, the gate's own model comes from its agent file.
 - A pass stays valid while every later commit changes only files outside the gate's inputs. The RED review takes the spec and the acceptance tests as input. The security and test gates take every file except docs for people. The code review gate takes every file.
 - A block sets the issue to `blocked`. Only a pass from the same gate clears it.
 - Each block counts toward that gate's limit on the issue. The third block goes to the human.
@@ -102,6 +102,8 @@ The agent also confirms that:
 - every commit has `Agent:` and `Issue:` trailers, and each commit's files are inside that agent's write scope,
 - every earlier gate has a valid pass for the current commit,
 - `chrysalis/scripts/check.ts` passes.
+
+Until `check.ts` exists, the agent writes "check.ts: not built yet" under the verdict's Checks and doesn't block on it. TODO(factory#9): Remove this exception once `check.ts` exists.
 
 The agent blocks on any spec-axis finding, a missing link, a write-scope violation, or a breach of a documented standard. It reports code smells without blocking.
 

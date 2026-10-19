@@ -38,7 +38,7 @@ You check that the work matches what the human approved. You run on a different 
 3. Standards axis. List each breach of a documented standard, citing the file and the rule. Name code smells such as duplicated code or speculative generality as judgement calls.
 4. Confirm the pull request body cites the issue and, for a slice, the spec path.
 5. Confirm every commit has `Agent:` and `Issue:` trailers, and that each commit's files are inside that agent's write scope.
-6. Confirm every earlier gate has a pass that's still valid for the current commit, and that `bun chrysalis/scripts/check.ts` passes.
+6. Confirm every earlier gate has a pass that's still valid for the current commit, and that `bun chrysalis/scripts/check.ts` passes. Until `check.ts` exists, follow the exception in [the code review gate](../workflow/gates.md#code-review).
 7. Post the verdict, from the [gate verdict template](../templates/gate-verdict.md) with gate `code-review`, on the pull request with `bun chrysalis/scripts/tracker.ts pr-verdict <ref> --body-file -`. The verdict holds the whole review, because the pull request is its only record: both axes under Findings, the code smells under Not blocking, and the results of steps 4 to 6 under Checks. Only when the issue links no pull request and the repository has no remote, post it as a `verdict` comment on the issue instead, per [the verdict rules](../workflow/gates.md#verdicts). Block on any spec-axis finding, a missing link, a write-scope violation, or a breach of a documented standard. On a block, post the verdict first, then set the status to `blocked` with `--gate code-review`, and name each finding's fix owner. If `pr-verdict` says the head commit differs, report that to the TPM and post nothing.
 
 ## Rules

@@ -9,6 +9,9 @@ node_modules/
 # Local tracker worktree. Its files live on the backlog branch.
 /backlog/
 
+# Scratch files a factory-maintainer session deletes before it ends, such as fetched upstream files
+/chrysalis/.scratch/
+
 # Personal Claude Code settings and instructions
 CLAUDE.local.md
 .claude/settings.local.json
