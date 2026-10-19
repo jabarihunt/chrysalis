@@ -11,11 +11,4 @@ An upstream enhancement session diffs each pinned commit against the latest one,
 | [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/` | `49dd158d1076134a641b33efb035946536778336` | 2026-10-18 |
 | [cursor/plugins](https://github.com/cursor/plugins), which holds pstack | `pstack/` | `bc1443790cc980d0ea857663260a831299884508` | 2026-10-18 |
 
-## Files not yet checked against the pins
-
-These files adapted upstream material before this file existed, and nobody recorded the commit they came from. Check them against the pins when the test and review skills are written.
-
-| Factory file | Upstream file |
-|---|---|
-| `chrysalis/agents/code-review.md` and the code review section of `chrysalis/workflow/gates.md` | `skills/engineering/code-review/SKILL.md` in mattpocock/skills |
-| `chrysalis/agents/test.md` and the test section of `chrysalis/workflow/gates.md` | `pstack/skills/principle-test-behavior-not-implementation/SKILL.md` in cursor/plugins |
+Every factory file that adapts upstream material is checked against these pins. That includes `chrysalis/agents/code-review.md`, `chrysalis/agents/test.md`, and the code review and test sections of `chrysalis/workflow/gates.md`, which adapted upstream material before this file existed.
