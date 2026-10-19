@@ -104,9 +104,9 @@ flowchart TD
 11. **Test gate.** The TPM sets `test-review` and briefs the test agent.
 12. **Docs.** The TPM sets `docs` and briefs the documentation agent. The agent updates the docs for people and posts the PR body on the issue.
 13. **Pull request.** The TPM sets `ready-for-pr` and gives the human the branch name and the PR body. The human opens the pull request.
-14. **Code review gate.** The TPM sets `code-review` and briefs the code review agent.
+14. **Code review gate.** The TPM links the pull request with `tracker link --field pr`, sets `code-review`, and briefs the code review agent. In a repository with a remote, the tracker CLI refuses `code-review` until the issue links the pull request. The agent posts its verdict on the pull request, as [the verdict rules](gates.md#verdicts) require.
 15. **Merge.** On a pass, the TPM sets `ready-to-merge`. The human merges.
-16. **Close.** The TPM sets the slice issue to `done`, runs the stack's slice-end command if one exists, and posts a `retro` comment. The retro names what blocked, what the human corrected, and what an agent got wrong. If the cut has slices left, the TPM returns to step 4. After the last slice, it sets the request issue to `done`.
+16. **Close.** The TPM sets the slice issue to `done`, runs the stack's slice-end command if one exists, and posts a `retro` comment. The retro names what blocked, what the human corrected, and what an agent got wrong. For a code review block, it links the verdict on the pull request instead of restating the findings. If the cut has slices left, the TPM returns to step 4. After the last slice, it sets the request issue to `done`.
 
 ## Small change
 
@@ -167,7 +167,7 @@ Only the TPM changes statuses, with one exception. A gate agent sets `blocked` w
 ## Briefs, reports, and questions
 
 - The TPM briefs one agent per run with the [agent brief template](../templates/agent-brief.md). The agent starts with a fresh context and sees only the brief and the files it points to, so the brief carries everything the run needs.
-- Each run ends with a report in the brief's report format. The TPM posts a summary on the issue as a `report` comment.
+- Each run ends with a report in the brief's report format. The TPM posts a summary on the issue as a `report` comment. After a code review run, the comment only links the verdict on the pull request.
 - An agent with a question posts a `question` comment that names who should answer. The TPM routes it, either to another agent through a new brief that quotes the question, or to the human. The answer goes on the issue as an `answer` comment.
 - Agents reach each other only through the issue and the TPM.
 - When two agents disagree, the TPM escalates instead of choosing.
@@ -175,7 +175,7 @@ Only the TPM changes statuses, with one exception. A gate agent sets `blocked` w
 ## Gates and blocks
 
 - The RED review runs before implementation. After implementation, the gates run in the order security, test, code review. [The gates file](gates.md) lists what each one checks.
-- Each gate posts a `verdict` comment that names the commit it checked.
+- Each gate posts a verdict that names the commit it checked. The code review gate posts on the pull request, and the other gates post a `verdict` comment on the issue.
 - On a block, the gate agent sets `blocked`, fills `blocked_by`, and lists each finding with its fix owner. The TPM briefs the owner with the findings. The status stays `blocked` while the owner works.
 - When the fix is in, the TPM briefs the same gate to rerun. Only the gate that blocked can clear the block, and it clears the block by passing.
 - A pass covers the commit it names. After a fix, the TPM reruns, in order, every gate whose pass the fix invalidated. [Verdict rules](gates.md#verdicts) define which commits invalidate a pass.
@@ -208,7 +208,7 @@ To escalate, the TPM saves the current status in `prior_status`, sets `needs-hum
 - Branch names are `<app>/<feature>-<NN>` for slices, `<app>/setup` for app setup, and `<app>/<issue number>-<slug>` for small changes, bugs, and docs-only work. Factory work uses `factory/<issue number>-<slug>`.
 - Every commit ends with `Agent:` and `Issue:` trailers.
 - Agents never rebase, force-push, open pull requests, or merge. If a branch needs changes from `master`, the TPM asks the human.
-- When the repository has a remote, agents push the work branch. Without a remote, the human opens a pull request by telling the TPM the branch is ready for review, and merges it locally.
+- When the repository has a remote, agents push the work branch. Without a remote, the human opens a pull request by telling the TPM the branch is ready for review, and merges it locally. The code review verdict then goes on the issue, because no pull request exists.
 
 ## Limits
 

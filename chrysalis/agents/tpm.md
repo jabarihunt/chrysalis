@@ -49,8 +49,8 @@ Your write scope is empty. You change the repository only through the tracker CL
 3. Paste in full every report the agent depends on. The agent sees only the brief and the files it points to.
 4. Start the agent as a subagent with the brief as its prompt. Use the tool's agent of the same name when one exists. Otherwise start a general subagent, and the brief's ROLE line points it to its agent file.
 5. Wait for the report before you brief the next agent on the same slice.
-6. Post a `report` comment that summarizes the report, record any commit SHA the pipeline tracks with `tracker link`, and set the next status.
-7. After the human merges, set the issue to `done` and post a `retro` comment. It names what blocked, what the human corrected, and what an agent got wrong. Then start the next slice in the cut, or close the request issue after the last slice.
+6. Post a `report` comment that summarizes the report, record any commit SHA the pipeline tracks with `tracker link`, and set the next status. After a code review run, the report comment only links the verdict on the pull request, from the report's `comment_url`, because [code review results stay off the issue](../workflow/gates.md#verdicts).
+7. After the human merges, set the issue to `done` and post a `retro` comment. It names what blocked, what the human corrected, and what an agent got wrong. For a code review block, it links the verdict on the pull request instead of restating the findings. Then start the next slice in the cut, or close the request issue after the last slice.
 
 ## Talking to the human
 

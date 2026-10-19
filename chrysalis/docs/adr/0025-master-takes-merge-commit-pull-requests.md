@@ -13,6 +13,6 @@ A merge commit keeps every branch commit on `master`. Squash and rebase merges r
 
 ## Consequences
 
-- The ruleset can't stop anything acting as the human's account from merging a pull request or deleting the ruleset. Tool permission rules deny agents `gh pr merge` and `gh api`, and the move to a bot account in Q-09 closes the rest.
-- Required status checks wait until CI runs `check.ts`.
+- The ruleset can't stop anything acting as the human's account from merging a pull request or deleting the ruleset. Tool permission rules deny agents `gh pr merge` and `gh api`, and the move to a bot account in Q-09 closes the rest. The tracker CLI's `pr-verdict` still calls `gh api` inside its own process to set the code review status, as 0026 describes.
+- Required status checks wait until CI runs `check.ts`. The code review gate's `chrysalis/code-review` status, from 0026, can become a required check too.
 - Rulesets on private repositories need GitHub Pro or Team.

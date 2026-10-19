@@ -8,7 +8,7 @@ Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote th
 
 - Bun 1.2.21 or later, for the factory's scripts.
 - git 2.42 or later.
-- gh 2.94 or later, logged in, for apps that use the GitHub tracker.
+- gh 2.94 or later, logged in, for apps that use the GitHub tracker, and for code reviews on GitHub pull requests whatever the tracker. The code review gate posts its verdict on the pull request through `gh`.
 
 The tracker CLI checks these versions when it starts.
 
@@ -58,7 +58,7 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `apps/` | One folder per app, created by app setup. The template has none. |
 | `chrysalis/agents/` | One file per agent, with its role, write scope, skills, and model class |
 | `chrysalis/models.yaml` | The model each model class uses in each tool |
-| `chrysalis/scripts/` | The tracker CLI and its tests. Run the tests with `bun test chrysalis/scripts`. |
+| `chrysalis/scripts/` | The tracker CLI and its tests. Run the tests with `bun test chrysalis/scripts`. For the typecheck, run `bun install --cwd chrysalis/scripts` once, then `bun run --cwd chrysalis/scripts typecheck`. |
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
 | `chrysalis/templates/` | Templates for specs, issues, briefs, and verdicts |
 | `chrysalis/skills/` | Skills the agents read |

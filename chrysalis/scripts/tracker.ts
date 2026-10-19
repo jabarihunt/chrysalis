@@ -7,6 +7,7 @@ import { run } from "./lib/proc";
 import type { Adapter } from "./lib/tracker/adapter";
 import { GitHubAdapter } from "./lib/tracker/github";
 import { LocalAdapter } from "./lib/tracker/local";
+import { postPrVerdict } from "./lib/tracker/pr";
 import {
   COMMENT_TYPE_NAMES,
   GATE_NAMES,
@@ -23,9 +24,10 @@ import {
   planComment,
   planCreate,
   planLink,
+  planPrVerdict,
   planSet,
 } from "./lib/tracker/rules";
-import type { Issue, Kind, Status } from "./lib/tracker/rules";
+import type { Issue, Kind, RepoFacts, Status } from "./lib/tracker/rules";
 import { checkTools } from "./lib/versions";
 import type { Tool } from "./lib/versions";
 
@@ -41,6 +43,7 @@ Commands:
   set <ref> --status <status> [--gate <gate>]
   link <ref> --field <field> --value <value>
   close <ref> --status <done or cancelled>
+  pr-verdict <ref> --body-file <path or ->
 
 Kinds: ${KINDS.join(", ")}
 Comment types: ${COMMENT_TYPE_NAMES.join(", ")}
@@ -61,6 +64,7 @@ const COMMANDS: Record<string, Spec> = {
   set: { ref: true, required: ["status"], optional: ["gate"] },
   link: { ref: true, required: ["field", "value"], optional: [] },
   close: { ref: true, required: ["status"], optional: [] },
+  "pr-verdict": { ref: true, required: ["body-file"], optional: [] },
 };
 const OPTIONS = ["app", "agent", "kind", "title", "body-file", "parent", "status", "gate", "type", "field", "value"] as const;
 
@@ -78,6 +82,13 @@ async function repoRoot(): Promise<string> {
   const common = result.stdout.trim();
   if (!common.endsWith("/.git")) throw new TrackerError(`The tracker needs a repository with a working tree. git's directory is ${common}.`);
   return dirname(common);
+}
+
+/** Whether git lists a remote. Code review verdicts go on the issue only in a repository without one. */
+async function repoFacts(root: string): Promise<RepoFacts> {
+  const result = await run(["git", "remote"], { cwd: root });
+  if (result.code !== 0) throw new TrackerError(`git remote failed: ${result.stderr.trim()}`);
+  return { hasRemote: result.stdout.trim() !== "" };
 }
 
 type AppConfig = { type: "local" | "github"; repo?: string };
@@ -184,7 +195,7 @@ async function main(argv: string[]): Promise<unknown> {
 
   const root = await repoRoot();
   const config = await loadApp(root, app);
-  const tools: Tool[] = config.type === "github" ? ["bun", "git", "gh"] : ["bun", "git"];
+  const tools: Tool[] = config.type === "github" || command === "pr-verdict" ? ["bun", "git", "gh"] : ["bun", "git"];
   const problems = await checkTools(tools);
   if (problems.length) throw new TrackerError(problems.join(" "));
   const adapter: Adapter = config.type === "github" ? await GitHubAdapter.open(root, app, config.repo) : await LocalAdapter.open(root, app);
@@ -210,12 +221,12 @@ async function main(argv: string[]): Promise<unknown> {
     }
     case "comment": {
       const issue = await getIssue(adapter, ref, app);
-      const comment = planComment(issue, agent, values.type!, await readBody(values["body-file"]!));
+      const comment = planComment(issue, agent, values.type!, await readBody(values["body-file"]!), await repoFacts(root));
       return issueJson(await adapter.comment(issue, { ...comment, at: now() }, agent));
     }
     case "set": {
       const issue = await getIssue(adapter, ref, app);
-      const after = applyChange(issue, planSet(issue, agent, values.status!, values.gate ?? null));
+      const after = applyChange(issue, planSet(issue, agent, values.status!, values.gate ?? null, await repoFacts(root)));
       return issueJson(await adapter.update(issue, after, agent, `Set ${issue.ref} to ${after.status}`));
     }
     case "link": {
@@ -227,6 +238,11 @@ async function main(argv: string[]): Promise<unknown> {
       const issue = await getIssue(adapter, ref, app);
       const after = applyChange(issue, planClose(issue, agent, values.status!));
       return issueJson(await adapter.close(issue, after, agent));
+    }
+    case "pr-verdict": {
+      const issue = await getIssue(adapter, ref, app);
+      const verdict = planPrVerdict(issue, agent, await readBody(values["body-file"]!));
+      return { ref: issue.ref, gate: verdict.gate, verdict: verdict.verdict, ...(await postPrVerdict(issue.pr!, verdict, agent, now())) };
     }
   }
   return undefined;

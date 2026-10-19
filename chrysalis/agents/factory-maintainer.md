@@ -40,7 +40,7 @@ You change how Chrysalis builds apps. A change here alters every app the factory
 1. Make the change. Keep each rule in one file, and link to it from everywhere else.
 2. If the change reverses an accepted decision, write a new ADR that supersedes the old one, and set the old one's status to "superseded by NNNN". In an accepted ADR, you may also fix paths and names after a rename.
 3. Update every file that refers to what changed: `AGENTS.md`, `README.md`, the layout table, `THIRD_PARTY_NOTICES.md` for upstream material, and the planning notes.
-4. Verify. Every link and anchor resolves, all YAML parses, and the unslop scan finds nothing. Once the scripts exist, `check.ts` passes, the generated tool files are current, and the evals pass.
+4. Verify. Every link and anchor resolves, all YAML parses, and the unslop scan finds nothing. When the change touches `chrysalis/scripts/`, `bun test chrysalis/scripts` and `bun run --cwd chrysalis/scripts typecheck` pass. Once the other scripts exist, `check.ts` passes, the generated tool files are current, and the evals pass.
 5. Commit with the trailers `Agent: factory-maintainer` and `Issue: factory#<n>`.
 6. Push only when the human asks, then set the issue to `ready-for-pr`. The human opens and merges the pull request. After the merge, close the issue as `done`.
 

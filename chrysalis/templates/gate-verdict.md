@@ -1,8 +1,8 @@
-<!-- Gate verdict template. Gate agents post this as a "verdict" comment through the tracker CLI, which writes the header line. Delete these comments. -->
+<!-- Gate verdict template. Gate agents post it through the tracker CLI, which writes the header line. The code review gate posts it on the pull request with pr-verdict. The other gates post it as a "verdict" comment on the issue. The CLI reads the Gate, Verdict, and Commit lines, so keep those three labels as they are. Delete these comments. -->
 
 Gate: <red-review, security, test, or code-review>
 Verdict: <pass or block>
-Commit: <the SHA checked>
+Commit: <the SHA checked. For the code review gate, the pull request's head commit.>
 Range: <the git range reviewed, such as master...HEAD>
 Block count: <blocks at this gate on this issue, including this one, such as 1 of 3>
 Model: <tool and model ID, such as kiro claude-opus-5.5>
@@ -10,7 +10,7 @@ Same family as the reviewed work: <yes or no. Yes is allowed only in a tool mark
 
 ## Findings
 
-<"None" on a clean pass. On a block, every finding that caused it.>
+<"None" on a clean pass. On a block, every finding that caused it. The code review gate splits this section into "### Spec axis" and "### Standards axis", each with its own table or "None".>
 
 | # | Severity | Where | Finding | Breaks | Fix owner |
 |---|---|---|---|---|---|
@@ -19,3 +19,12 @@ Same family as the reviewed work: <yes or no. Yes is allowed only in a tool mark
 ## Not blocking
 
 <Findings that don't block. The TPM may turn them into issues. "None" if there are none.>
+
+## Checks
+
+<Code review gate only. Delete this section for the other gates.>
+
+- Pull request body: <cites the issue and, for a slice, the spec path, or what it's missing>
+- Commit trailers and write scopes: <every commit passes, or each commit that doesn't and why>
+- Earlier gates: <each earlier gate, its verdict, and the commit its pass covers>
+- check.ts: <passed, or each failing check>
