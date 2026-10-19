@@ -9,7 +9,7 @@ Each gate agent runs on a different model from the agent whose work it reviews. 
 
 In a tool that offers more than one model family, the difference is a family difference. The build, test, and review classes then use three families, as in Cursor, Kilo, and Kiro.
 
-Claude Code offers only Claude models. There, each of the three classes uses a different Claude model, and `chrysalis/models.yaml` marks the tool `single_family: true`. Every verdict names the model it ran on and whether that model's family matches the family of the work it reviewed, so a same-family verdict is visible on the issue. The pilot compares gate findings from Claude Code with those from the other tools.
+Claude Code offers only Claude models. There, each of the three classes uses a different Claude model, and `chrysalis/models.yaml` marks the tool `single_family: true`. Every verdict names the model it ran on and whether that model's family matches the family of the work it reviewed, so a same-family verdict is visible where the verdict is posted: on the issue, or on the pull request for the code review gate, as 0026 describes. The pilot compares gate findings from Claude Code with those from the other tools.
 
 This supersedes ADR 0018, which required a family difference in every tool.
 

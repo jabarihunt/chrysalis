@@ -20,9 +20,12 @@ Parts of this repository are copied or adapted from the projects below. Each ski
 | `chrysalis/templates/agent-brief.md` | pstack, `pstack/skills/poteto-mode/playbooks/orchestrate.md` | Brief fields adapted. |
 | `chrysalis/templates/adr.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/ADR-FORMAT.md` | Format adapted. |
 | `chrysalis/templates/glossary.md` | Matt Pocock's skills, `skills/engineering/domain-modeling/GLOSSARY-FORMAT.md` | Format adapted. |
+| `chrysalis/skills/acceptance-testing/SKILL.md` | pstack, `pstack/skills/principle-test-behavior-not-implementation/SKILL.md` and `pstack/skills/create-verification-skill/SKILL.md`, and Matt Pocock's skills, `skills/engineering/tdd/SKILL.md` and `tests.md` in that folder | Judging a test by an edit that breaks the behavior and one that changes only the internals, asserting what the contract promises, testing at agreed seams, and driving the real user path adapted. |
+| `chrysalis/skills/regression-testing/SKILL.md` | Matt Pocock's skills, `skills/engineering/diagnosing-bugs/SKILL.md`, and pstack, `pstack/skills/tdd/SKILL.md` and `pstack/automations/benny/skills/reproduce-and-fix-issues/SKILL.md` | A test that goes red on the exact symptom at a seam on the bug's real path, shrinking the case, deterministic failures, and reproducing twice without forcing the symptom adapted. |
+| `chrysalis/skills/code-review/SKILL.md` | Matt Pocock's skills, `skills/engineering/code-review/SKILL.md`, and pstack, `rubric.md`, `lead-judgment.md`, and `reviewer-prompt.md` in `pstack/skills/interrogate/references/` | The spec and standards axes kept apart, the code smell list, tracing a bug's input path, and dropping findings without evidence adapted. |
 | `chrysalis/agents/code-review.md` and `chrysalis/workflow/gates.md` | Matt Pocock's skills, `skills/engineering/code-review/SKILL.md` | The spec and standards review axes adapted. |
 | `chrysalis/agents/spec-writer.md` | Matt Pocock's skills, `skills/engineering/to-spec/SKILL.md`, `skills/engineering/to-tickets/SKILL.md`, and `skills/engineering/domain-modeling/ADR-FORMAT.md` | Seam choice, vertical slices, and when to write an ADR adapted. |
-| `chrysalis/agents/test.md` and `chrysalis/workflow/gates.md` | pstack, `pstack/skills/principle-test-behavior-not-implementation/SKILL.md` | The test that fails when every import returns `undefined` adapted. |
+| `chrysalis/agents/test.md` and `chrysalis/workflow/gates.md` | pstack, `pstack/skills/principle-test-behavior-not-implementation/SKILL.md` | A test that fails when the behavior breaks, in its simplest form a test that fails when every import returns `undefined`, adapted. |
 
 ## pstack
 
