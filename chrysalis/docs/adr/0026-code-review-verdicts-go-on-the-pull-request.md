@@ -20,7 +20,7 @@ Agents can't run `gh`, and every tool denies them `gh api` and `gh pr review`, s
 ## Consequences
 
 - `pr-verdict` needs `gh` whenever the issue links a GitHub pull request, whatever the app's tracker. An app on the local tracker needs `gh` for its code reviews too.
-- After a code review run, the TPM's report comment links the verdict on the pull request and summarizes none of it. A retro links a code review block's verdict instead of restating its findings.
+- After a code review run, the TPM's report comment links the verdict on the pull request and summarizes none of it. A retro names a code review block's cause in one sentence and the rule it missed, and links the verdict. That line isn't a summary of the findings, which stay on the pull request.
 - Each run of `pr-verdict` sets the status again. When the code review agent's newest verdict comment already holds the same verdict, the CLI reuses that comment, so a retry after a failed status call posts no second comment.
 - A new commit on the pull request has no `chrysalis/code-review` status until the gate reviews it.
 - When `check.ts` checks each gate's latest verdict, it reads the code review gate's from the pull request.
