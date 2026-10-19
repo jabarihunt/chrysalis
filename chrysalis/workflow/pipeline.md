@@ -106,7 +106,7 @@ flowchart TD
 13. **Pull request.** The TPM sets `ready-for-pr` and gives the human the branch name and the PR body. The human opens the pull request.
 14. **Code review gate.** The TPM links the pull request with `tracker link --field pr`, sets `code-review`, and briefs the code review agent. In a repository with a remote, the tracker CLI refuses `code-review` until the issue links the pull request. The agent posts its verdict on the pull request, as [the verdict rules](gates.md#verdicts) require.
 15. **Merge.** On a pass, the TPM sets `ready-to-merge`. The human merges.
-16. **Close.** The TPM sets the slice issue to `done`, runs the stack's slice-end command if one exists, and posts a `retro` comment. The retro names what blocked, what the human corrected, and what an agent got wrong. For a code review block, it links the verdict on the pull request instead of restating the findings. If the cut has slices left, the TPM returns to step 4. After the last slice, it sets the request issue to `done`.
+16. **Close.** The TPM sets the slice issue to `done`, runs the stack's slice-end command if one exists, and posts a `retro` comment. The retro names what blocked, what the human corrected, and what an agent got wrong. For a code review block, it gives the cause in one sentence and the rule it missed, and links the verdict on the pull request for the findings. If the cut has slices left, the TPM returns to step 4. After the last slice, it sets the request issue to `done`.
 
 ## Small change
 

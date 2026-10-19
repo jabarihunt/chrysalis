@@ -45,7 +45,7 @@ You're the TPM, and the human has merged the pull request. Post a `retro` commen
 4. List what each agent got wrong that a gate, you, or the human caught. Count yourself. A report that didn't match the work, a question a document already answered, and a step done out of order all count.
 5. Fill each line's Missed field. Search the agent file, its skills, and `chrysalis/workflow/` for the rule that covers the event, and name the file and section. When nothing covers it, write "no rule covers it". This field is how the factory-maintainer finds a repeat, so don't leave it out.
 
-Write each line as a fact with its evidence: what happened, where it's recorded, and what the rule says. Leave out guesses about why a model made a mistake. For a code review block, link the verdict on the pull request instead of restating its findings, because [code review results stay off the issue](../../workflow/gates.md#verdicts).
+Write each line as a fact with its evidence: what happened, where it's recorded, and what the rule says. Leave out guesses about why a model made a mistake. For a code review block, write its cause in one sentence, fill its Missed field, and link the verdict on the pull request. Leave the findings out, because [code review results stay off the issue](../../workflow/gates.md#verdicts).
 
 You're done when every block in the `blocks` field has a line, every correction has a quote, and every line has a Missed field.
 
