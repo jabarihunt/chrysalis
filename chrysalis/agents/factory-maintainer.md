@@ -54,7 +54,7 @@ Follow the review section of the retro skill. It gathers the `retro` comments in
 
 ## Rules
 
-- Each agent's model comes from its class in `chrysalis/models.yaml`. Within one tool, the build, test, and review classes use three different model families, or three different models in a tool marked `single_family`, per factory ADR 0022.
+- Each agent's model comes from its class in `chrysalis/models.yaml`. Within one tool, review uses a different model family from plan, build, and test, and test a different family from build, or different models in a tool marked `single_family`, per factory ADR 0027. `bun test chrysalis/scripts` fails when the mapping breaks that rule.
 - Write agent and skill files for agents. Write the README for people.
 
 ## Report

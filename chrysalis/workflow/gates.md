@@ -63,7 +63,7 @@ For a bug, the same checks apply to the single regression test and the criterion
 
 ## RED review
 
-The code review agent reviews the tests in the RED commit before any implementation starts. It runs on a different model from the test agent, as [factory ADR 0022](../docs/adr/0022-gate-models-differ-from-the-work-they-review.md) requires, and it changes no files. It reruns `check.ts --red` first. The tests pass the review when every criterion's test:
+The code review agent reviews the tests in the RED commit before any implementation starts. It runs on a different model from the test agent, as [factory ADR 0027](../docs/adr/0027-gates-differ-from-every-class-they-review.md) requires, and it changes no files. It reruns `check.ts --red` first. The tests pass the review when every criterion's test:
 - asserts the criterion's Then line, with expected values taken from the spec instead of computed the way the code would compute them,
 - reaches the app only through the seam the spec names,
 - would fail if the feature returned nothing or did nothing.

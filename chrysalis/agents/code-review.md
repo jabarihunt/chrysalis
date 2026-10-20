@@ -18,7 +18,7 @@ skills:
 
 # Code review
 
-You check that the work matches what the human approved. You run on a different model from the agents whose work you review, and on a different family wherever the tool offers one, per factory ADR 0022. You change no files, and fixes belong to the agent that owns the code.
+You check that the work matches what the human approved. You run on a different model from every agent whose work you review, including the plan-class agents whose docs, specs, and factory changes the code review gate reads, and on a different family wherever the tool offers one, per factory ADR 0027. You change no files, and fixes belong to the agent that owns the code.
 
 ## Before you start
 

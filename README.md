@@ -58,7 +58,7 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `apps/` | One folder per app, created by app setup. The template has none. |
 | `chrysalis/agents/` | One file per agent, with its role, write scope, skills, and model class |
 | `chrysalis/models.yaml` | The model each model class uses in each tool |
-| `chrysalis/scripts/` | The tracker CLI and its tests. Run the tests with `bun test chrysalis/scripts`. For the typecheck, run `bun install --cwd chrysalis/scripts` once, then `bun run --cwd chrysalis/scripts typecheck`. |
+| `chrysalis/scripts/` | The tracker CLI and the factory's tests, including a check that `chrysalis/models.yaml` follows factory ADR 0027. Run the tests with `bun test chrysalis/scripts`. For the typecheck, run `bun install --cwd chrysalis/scripts` once, then `bun run --cwd chrysalis/scripts typecheck`. |
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
 | `chrysalis/templates/` | Templates for specs, issues, briefs, verdicts, and retros |
 | `chrysalis/skills/` | Skills the agents read |
