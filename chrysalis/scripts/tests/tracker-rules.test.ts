@@ -68,6 +68,26 @@ describe("planSet", () => {
     expect(second.blocks).toEqual({ security: 2 });
   });
 
+  test("a gate that blocks again while its own block stands records the block, and the count goes up", () => {
+    const blocked = issue({ status: "blocked", blocked_by: "security", blocks: { security: 1, test: 1 } });
+    const again = applyChange(blocked, planSet(blocked, "security", "blocked", "security"));
+    expect(again).toMatchObject({ status: "blocked", blocked_by: "security", blocks: { security: 2, test: 1 } });
+    const third = applyChange(again, planSet(again, "security", "blocked", "security"));
+    expect(third.blocks).toEqual({ security: 3, test: 1 });
+    const redBlocked = issue({ status: "blocked", blocked_by: "red-review", blocks: { "red-review": 1 } });
+    expect(planSet(redBlocked, "code-review", "blocked", "red-review").fields?.blocks).toEqual({ "red-review": 2 });
+  });
+
+  test("only the gate that holds the block can block again", () => {
+    const blocked = issue({ status: "blocked", blocked_by: "security", blocks: { security: 1 } });
+    expect(err(() => planSet(blocked, "test", "blocked", "test"))).toContain("already has status blocked");
+    expect(err(() => planSet(blocked, "test", "blocked", "security"))).toContain("run by security, not test");
+    expect(err(() => planSet(blocked, "security", "blocked", null))).toContain("already has status blocked");
+    expect(err(() => planSet(blocked, "tpm", "blocked", "security"))).toContain("--gate is for gate agents");
+    const redBlocked = issue({ status: "blocked", blocked_by: "red-review", blocks: { "red-review": 1 } });
+    expect(err(() => planSet(redBlocked, "code-review", "blocked", "code-review"))).toContain("already has status blocked");
+  });
+
   test("the code review agent runs both the RED review and the code review gate", () => {
     const red = applyChange(issue(), planSet(issue(), "code-review", "blocked", "red-review"));
     expect(red.blocked_by).toBe("red-review");
