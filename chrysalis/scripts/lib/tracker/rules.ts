@@ -228,7 +228,9 @@ export function planSet(issue: Issue, agent: string, target: string, gate: strin
   if (FINAL_STATUSES.includes(issue.status)) fail(`${issue.ref} is closed as ${issue.status}.`);
   if (FINAL_STATUSES.includes(to)) fail(`Use close to set ${to}.`);
   if (!(STATUSES[to] as readonly Kind[]).includes(issue.kind)) fail(`A ${issue.kind} issue can't have status ${to}.`);
-  if (to === issue.status) fail(`${issue.ref} already has status ${to}.`);
+  // A gate that blocks again on a rerun, while its own block stands, sets blocked a second time.
+  const reblock = to === "blocked" && issue.status === "blocked" && gate !== null && issue.blocked_by === gate;
+  if (to === issue.status && !reblock) fail(`${issue.ref} already has status ${to}.`);
   const manager = managerOf(issue.app);
 
   if (agent !== manager && isGateAgent(agent)) {
@@ -237,8 +239,9 @@ export function planSet(issue: Issue, agent: string, target: string, gate: strin
       const g = gate as Gate;
       if (!GATE_NAMES.includes(g)) fail(`Unknown gate "${gate}". Gates: ${GATE_NAMES.join(", ")}.`);
       if (GATES[g].agent !== agent) fail(`The ${g} gate is run by ${GATES[g].agent}, not ${agent}.`);
-      if (issue.status !== GATES[g].status) {
-        fail(`The ${g} gate blocks only while the status is ${GATES[g].status}. ${issue.ref} is ${issue.status}.`);
+      const ownBlock = issue.status === "blocked" && issue.blocked_by === g;
+      if (issue.status !== GATES[g].status && !ownBlock) {
+        fail(`The ${g} gate blocks only while the status is ${GATES[g].status}, or while its own block stands. ${issue.ref} is ${issue.status}.`);
       }
       return { status: "blocked", fields: { blocked_by: g, blocks: { ...issue.blocks, [g]: (issue.blocks[g] ?? 0) + 1 } } };
     }

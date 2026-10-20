@@ -157,8 +157,10 @@ describe("issues", () => {
     expect(verdict.json.comments[0].type).toBe("verdict");
     const lift = await tracker(repo, ["set", "todo#1", ...T, "--status", "test-review"]);
     expect(lift.error).toContain("Only the security gate can clear its block");
+    const again = await tracker(repo, ["set", "todo#1", "--app", "todo", "--agent", "security", "--status", "blocked", "--gate", "security"]);
+    expect(again.json).toMatchObject({ status: "blocked", blocked_by: "security", blocks: { security: 2 } });
     const pass = await tracker(repo, ["set", "todo#1", "--app", "todo", "--agent", "security", "--status", "security-review"]);
-    expect(pass.json).toMatchObject({ status: "security-review", blocked_by: null, blocks: { security: 1 } });
+    expect(pass.json).toMatchObject({ status: "security-review", blocked_by: null, blocks: { security: 2 } });
   });
 
   test("a closed issue takes a retro comment but no other changes", async () => {

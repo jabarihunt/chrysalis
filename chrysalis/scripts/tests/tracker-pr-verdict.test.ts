@@ -60,6 +60,17 @@ describe("pr-verdict", () => {
     expect(gh.state().prs[0]!.comments).toHaveLength(2);
   });
 
+  test("a second block on a rerun posts a new verdict and raises the gate's count", async () => {
+    const { gh, cli } = await setup();
+    const block = ["set", "todo#1", ...CR, "--status", "blocked", "--gate", "code-review"];
+    await postVerdict(cli, "block");
+    expect((await cli(block)).json.blocks).toEqual({ "code-review": 1 });
+    const rerun = verdict("block").replace("1. The route skips the owner check.", "1. The owner check still skips archived tasks.");
+    expect((await cli(["pr-verdict", "todo#1", ...CR, "--body-file", "-"], rerun)).json).toMatchObject({ state: "failure", reused_comment: false });
+    expect((await cli(block)).json).toMatchObject({ status: "blocked", blocked_by: "code-review", blocks: { "code-review": 2 } });
+    expect(gh.state().prs[0]!.comments).toHaveLength(2);
+  });
+
   test("refuses a verdict on a commit that isn't the pull request's head", async () => {
     const { gh, cli } = await setup();
     const result = await postVerdict(cli, "pass", "1234567");

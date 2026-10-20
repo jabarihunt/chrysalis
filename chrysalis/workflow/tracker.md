@@ -41,7 +41,7 @@ The CLI enforces these rules, and it allows each status only for the kinds [the 
 
 - `create` sets the first status from the kind: `intake` for a request, `criteria-review` for a small change, and `approved` for every other kind.
 - A slice needs `--parent`, the request issue it belongs to. No other kind takes a parent.
-- A gate agent sets `blocked` only while its gate runs, and names the gate with `--gate`. The CLI fills `blocked_by` and adds one to that gate's count in `blocks`.
+- A gate agent sets `blocked` only while its gate runs, and names the gate with `--gate`. The CLI fills `blocked_by` and adds one to that gate's count in `blocks`. A gate that blocks again on a rerun, while its own block stands, sets `blocked` the same way, and its count goes up again. No other gate can set `blocked` while that block stands.
 - Only the gate that blocked can clear the block. It clears it by setting the status in the last column below.
 
 | Gate | Run by | Status while it runs, and after its block clears |
