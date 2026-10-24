@@ -13,7 +13,7 @@ The gates between them review work from every class:
 - The test class runs the test gate, which reviews the implementers' work. So test differs from build and review.
 - Plan may share a family with build or test. No gate in either class reviews plan work, and no plan agent runs a gate on theirs.
 
-`chrysalis/models.yaml` holds each tool's mapping. Claude Code offers only Claude models, so its classes use different Claude models instead, and `chrysalis/models.yaml` marks it `single_family: true`. A fallback must also differ from every model its class must differ from. Every verdict names the model it ran on and whether that model's family matches the family of the work it reviewed.
+In Cursor, Kilo, and Kiro, plan and test use Claude, build uses Grok or an open-weight family, and review uses GPT. Claude Code offers only Claude models, so its classes use different Claude models instead, and `chrysalis/models.yaml` marks it `single_family: true`. A fallback must also differ from every model its class must differ from. Every verdict names the model it ran on and whether that model's family matches the family of the work it reviewed.
 
 A test in the factory's script tests fails when `chrysalis/models.yaml` breaks these rules.
 
@@ -30,5 +30,5 @@ This supersedes ADR 0022, which required different families only among build, te
 ## Consequences
 
 - The TPM's spec check judges the spec writer's work, and both are plan class, so the spec check stays same-model. It's the TPM's checklist rather than a gate agent's review, and the human's criteria approval follows it.
-- Kiro offers three families: Claude, GPT, and open-weight. With plan on Claude and review on GPT, build and test take Claude and an open-weight model, in either order. GPT-5.6 Sol is experimental in Kiro, which Q-17 covers.
+- In Kiro, review now runs on GPT-5.6 Sol at 4.4x credits and test on Claude Opus 5.5 at 2.0x, the reverse of before. GPT-5.6 Sol is experimental in Kiro, which Q-17 covers.
 - The model IDs stay unconfirmed until each tool's own model list confirms them, as Q-11 tracks.
