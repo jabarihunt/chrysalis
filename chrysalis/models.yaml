@@ -75,23 +75,31 @@ tools:
 
   kiro:
     source: https://kiro.dev/docs/models/available-models.md
-    check: Run /model in Kiro, and compare the IDs.
+    check: >-
+      Open the model picker in Kiro's chat panel, or run /model in the Kiro CLI.
+      The IDE picker shows display names, not IDs, so give each ID one test
+      prompt in a generated agent file. Kiro fails a wrong pinned ID on the
+      first prompt instead of falling back.
     note: >-
-      Kiro has no Grok or Gemini models, so build uses an open-weight family.
-      Claude Opus 5.5 and GPT-5.6 are experimental in Kiro and need the Pro
-      plan or above. Credit multipliers are 2.0x for Opus 5.5, 4.4x for
-      GPT-5.6 Sol, and 0.5x for GLM-5.
+      Kiro has Claude, GPT, and open-weight families, and no Grok or Gemini.
+      Plan and build use Claude, so test uses an open-weight family and review
+      uses GPT. Claude Opus 5.5 and GPT-5.6 Sol are experimental in Kiro, which
+      makes them Kiro Excluded Models, and need the Pro plan or above. Credit
+      multipliers are 2.0x for Opus 5.5, 4.4x for GPT-5.6 Sol, and 0.25x for
+      MiniMax M2.5. Checked against the Kiro IDE model picker on the Power plan
+      on 2026-10-24. The IDs follow the pattern in Kiro's agent configuration
+      docs, such as claude-sonnet-4.6, and no agent file has used them yet.
     plan:
       family: claude
       model: claude-opus-5.5
       confirmed: false
     build:
-      family: glm
-      model: glm-5
-      confirmed: false
-    test:
       family: claude
       model: claude-opus-5.5
+      confirmed: false
+    test:
+      family: minimax
+      model: minimax-m2.5
       confirmed: false
     review:
       family: gpt

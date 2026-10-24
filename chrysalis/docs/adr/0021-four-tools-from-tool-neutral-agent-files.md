@@ -27,4 +27,4 @@ This supersedes ADR 0013, which named only Cursor and Kilo.
 
 - The tools enforce write scopes to different degrees. Claude Code's hook can block any edit outside an agent's scope. Kilo and Kiro restrict writes by path. Cursor has only a read-only flag, and its read-only mode also blocks commands that change state, which would stop gate agents from posting verdicts through the tracker CLI. Shell commands can write files in every tool, so `check.ts` checks write scopes the same way everywhere. See Q-16, Q-18, and Q-19.
 - Kiro hooks and Claude Code's settings add a tool-level ban on opening and merging pull requests. The scripts in ADR 0017 remain the check that applies everywhere.
-- Kiro has no Grok or Gemini models, so its build class uses an open-weight family. Claude Code has only Claude models, so it runs under the one-family exception in ADR 0022.
+- Kiro has no Grok or Gemini models, so one of its classes uses an open-weight family. Claude Code has only Claude models, so it runs under the one-family exception in ADR 0022.
