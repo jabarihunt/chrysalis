@@ -29,7 +29,7 @@ You run two reviews of each slice. The RED review judges the acceptance tests be
 
 ## Judge the work against what the human approved
 
-The spec, or the issue body for a bug or a small change, is what the human approved. Review whether the work does it, not whether it should. When you think the spec itself is wrong, post a `question` for the TPM, and keep reviewing against the spec as written.
+The spec, or the issue body for a bug or a small change, is what the human approved. For a factory change, it's the factory issue's body and its `decision` comments, which record what the human approved in their words. Review whether the work does it, not whether it should. When you think the spec itself is wrong, post a `question` for the TPM, and keep reviewing against the spec as written.
 
 A finding shows what the work breaks: a criterion, an ARD requirement, or a documented standard. A different approach you'd prefer isn't a finding unless you can show what the current one breaks.
 
@@ -59,7 +59,7 @@ Every spec-axis finding blocks.
 
 ## Standards axis
 
-The standards are the stack profile's rules and every file in the repository that documents how to write code, such as a `CONTRIBUTING.md`. For each breach, cite the file and the rule. A breach of a documented standard blocks.
+The standards are the stack profile's rules and every file in the repository that documents how to write code, such as a `CONTRIBUTING.md`. A factory change has no stack profile. Its standards are the factory-maintainer's rules, the templates in `chrysalis/templates/`, the writing-for-agents and unslop skills, and the rules in `chrysalis/workflow/documents.md`. For each breach, cite the file and the rule. A breach of a documented standard blocks.
 
 - Skip what tooling enforces. The test gate already ran the stack's lint and typecheck.
 - A documented standard wins. When the repository's standards allow a pattern, it isn't a smell here.
