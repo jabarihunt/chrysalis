@@ -41,8 +41,9 @@ export function splitBody(text: string, where: string): { fields: Fields; body: 
   return { fields: readFields(data, where), body: normalized.slice(end + FIELDS_CLOSE.length).trim() };
 }
 
+/** Reads owner/repo from a GitHub remote URL in one of git's three forms for GitHub, and nothing else. */
 export function parseRepoUrl(url: string): string | null {
-  const match = url.trim().match(/github\.com[:/]([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?$/);
+  const match = url.trim().match(/^(?:https:\/\/github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?$/);
   return match ? `${match[1]}/${match[2]}` : null;
 }
 

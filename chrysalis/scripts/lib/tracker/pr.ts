@@ -95,14 +95,16 @@ async function originRepo(root: string): Promise<string> {
 }
 
 /**
- * The commit origin has for the branch, from this clone's remote-tracking ref. Refuses a branch that
- * was never pushed, or whose local head differs from origin's, so the pull request shows the work.
+ * The commit origin has for the branch, from this clone's remote-tracking ref. Refuses a branch this
+ * clone doesn't have, one that was never pushed, and one whose local head differs from origin's, so
+ * the pull request shows the work the agents committed.
  */
 async function pushedHead(root: string, branch: string): Promise<string> {
+  const local = await revParse(root, `refs/heads/${branch}`);
+  if (!local) throw new TrackerError(`This clone has no branch ${branch}. Open the pull request from the clone where the work was committed.`);
   const remote = await revParse(root, `refs/remotes/origin/${branch}`);
   if (!remote) throw new TrackerError(`This clone has no origin/${branch}. Push the branch with git push -u origin ${branch}, then open the pull request.`);
-  const local = await revParse(root, `refs/heads/${branch}`);
-  if (local && local !== remote) {
+  if (local !== remote) {
     throw new TrackerError(`${branch} is at ${local.slice(0, 7)}, but origin/${branch} is at ${remote.slice(0, 7)}. Push the branch, then open the pull request.`);
   }
   return remote;

@@ -96,13 +96,13 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 
 ## Pull requests
 
-The TPM opens each pull request with `pr-open`, and the human merges it. [Factory ADR 0029](../docs/adr/0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md) explains why. `pr-open` refuses to run unless:
+The TPM, or the factory-maintainer for factory issues, opens each pull request with `pr-open`, and the human merges it. [Factory ADR 0029](../docs/adr/0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md) explains why. `pr-open` refuses to run unless:
 
-- the repository has a remote, and origin is on GitHub,
+- the repository has a remote, and origin's URL starts with `https://github.com/`, `git@github.com:`, or `ssh://git@github.com/`,
 - the issue is `ready-for-pr`, links a branch, and links no pull request yet,
-- this clone's `origin/<branch>` exists and matches the local branch, so origin has every commit,
-- the title is one line of 70 characters or fewer,
-- the body has the PR body template's `Issue: <ref>` line for this issue.
+- this clone has the branch and `origin/<branch>`, at the same commit, so origin has every commit,
+- the title is 70 characters or fewer, with no line breaks, carriage returns, tabs, or other control characters,
+- the body has the line `Issue: <ref>` for this issue, exactly as the PR body template shows and on a line of its own.
 
 It then opens the pull request from the branch into `master`, sets the issue's `pr` field, and prints the pull request, the title, the branch, and the head commit. If `gh` refuses, as when the branch already has an open pull request, the issue links nothing.
 

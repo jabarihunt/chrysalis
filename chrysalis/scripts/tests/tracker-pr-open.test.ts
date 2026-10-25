@@ -23,9 +23,9 @@ const verdict = (result: "pass" | "block", commit: string) => `Gate: code-review
  * A local-tracker app whose bug issue is at ready-for-pr with its branch linked. The branch has one
  * commit, and by default origin has it, as after git push -u. GitHub numbers the next pull request 7.
  */
-async function setup(opts: { remote?: boolean; pushed?: boolean; ghVersion?: string } = {}) {
+async function setup(opts: { remote?: boolean; origin?: string; pushed?: boolean; ghVersion?: string } = {}) {
   const repo = await makeRepo();
-  if (opts.remote ?? true) await sh(["git", "remote", "add", "origin", "git@github.com:acme/todo.git"], repo);
+  if (opts.remote ?? true) await sh(["git", "remote", "add", "origin", opts.origin ?? "git@github.com:acme/todo.git"], repo);
   writeApp(repo, "todo", "tracker:\n  type: local\n");
   await sh(["git", "checkout", "--quiet", "-b", BRANCH], repo);
   writeFileSync(join(repo, "fix.txt"), "fix\n");
@@ -76,8 +76,13 @@ describe("pr-open", () => {
     const { cli, open, creates } = await setup();
     expect((await open(TPM, body(), "x".repeat(71))).error).toContain("70 characters or fewer");
     expect((await open(TPM, body(), "Two\nlines")).error).toContain("one line");
+    expect((await open(TPM, body(), "One\rTwo")).error).toContain("no line breaks, carriage returns, tabs, or other control characters");
+    expect((await open(TPM, body(), "One\tTwo")).error).toContain("no line breaks, carriage returns, tabs, or other control characters");
     expect((await open(TPM, "## Summary\n\nNo issue line.\n")).error).toContain(`"Issue: todo#1" line`);
-    expect((await open(TPM, body("todo#12"))).error).toContain(`"Issue: todo#1" line`);
+    // Only the template's line counts: "Issue: todo#1" exactly, on a line of its own.
+    for (const line of ["Issue: todo#12", "Issue:todo#1", "Issue: todo#1 extra", "Issue: todo#1, which also does todo#2", " Issue: todo#1", "Issues: todo#1"]) {
+      expect((await open(TPM, `## Summary\n\nText.\n\n${line}\nSpec: None\n`)).error).toContain(`"Issue: todo#1" line, exactly and on its own line`);
+    }
 
     await cli(["set", "todo#1", ...TPM, "--status", "needs-human"]);
     expect((await open()).error).toContain("todo#1 is needs-human. Set ready-for-pr");
@@ -95,6 +100,22 @@ describe("pr-open", () => {
     await sh(["git", "update-ref", `refs/remotes/origin/${BRANCH}`, master], repo);
     expect((await open()).error).toContain(`but origin/${BRANCH} is at ${master.slice(0, 7)}. Push the branch`);
     expect(creates()).toEqual([]);
+  });
+
+  test("refuses an origin/<branch> ref when this clone has no branch to compare it with", async () => {
+    const { repo, open, creates } = await setup();
+    await sh(["git", "branch", "--quiet", "-D", BRANCH], repo);
+    expect((await sh(["git", "rev-parse", "--verify", `refs/remotes/origin/${BRANCH}`], repo)).trim()).toMatch(/^[0-9a-f]{40}$/);
+    expect((await open()).error).toContain(`This clone has no branch ${BRANCH}`);
+    expect(creates()).toEqual([]);
+  });
+
+  test("refuses an origin that only looks like GitHub", async () => {
+    for (const origin of ["https://evil.example/github.com/acme/todo.git", "git@evil.example:github.com/acme/todo.git"]) {
+      const { open, creates } = await setup({ origin });
+      expect((await open()).error).toContain(`origin isn't a GitHub repository: ${origin}`);
+      expect(creates()).toEqual([]);
+    }
   });
 
   test("without a remote no pull request can exist, and pr-open checks for gh", async () => {

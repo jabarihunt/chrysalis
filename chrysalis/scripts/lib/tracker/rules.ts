@@ -366,20 +366,27 @@ export function planPrVerdict(issue: Issue, agent: string, body: string): Verdic
 /** The PR body template asks for a title of 70 characters or fewer. */
 export const PR_TITLE_MAX = 70;
 
+// Line breaks, carriage returns, tabs, and every other control character.
+const CONTROL = /[\u0000-\u001f\u007f]/;
+
 function checkPrTitle(title: string): string {
   const t = title.trim();
   if (!t) fail("The pull request title can't be empty.");
-  if (t.includes("\n")) fail("The pull request title must be one line.");
+  if (CONTROL.test(t)) fail("The pull request title must be one line, with no line breaks, carriage returns, tabs, or other control characters.");
   if (t.length > PR_TITLE_MAX) fail(`The pull request title must be ${PR_TITLE_MAX} characters or fewer, as the PR body template says. This one has ${t.length}.`);
   return t;
 }
 
-/** The body must hold the template's "Issue:" line for this issue, so the code review can find it. */
+/**
+ * The body must hold the template's "Issue: <ref>" line for this issue, exactly and on its own line,
+ * so the code review can find it.
+ */
 function checkPrBody(issue: Issue, body: string): string {
   const b = body.trim();
   if (!b) fail("The pull request body can't be empty.");
-  if (!new RegExp(`^Issue:[ \\t]*${issue.ref}(?![0-9])`, "m").test(b)) {
-    fail(`The pull request body needs the PR body template's "Issue: ${issue.ref}" line.`);
+  const line = `Issue: ${issue.ref}`;
+  if (!b.split(/\r?\n/).some((l) => l.trimEnd() === line)) {
+    fail(`The pull request body needs the PR body template's "${line}" line, exactly and on its own line. Name any other issue in the summary.`);
   }
   return b;
 }

@@ -207,7 +207,7 @@ To escalate, the TPM saves the current status in `prior_status`, sets `needs-hum
 - `master` is the primary branch. Only humans merge into it, through a pull request merged with a merge commit. The `protect-master` ruleset in `.github/rulesets/protect-master.json` enforces this on GitHub, and [factory ADR 0025](../docs/adr/0025-master-takes-merge-commit-pull-requests.md) explains why squash and rebase merges are off.
 - Branch names are `<app>/<feature>-<NN>` for slices, `<app>/setup` for app setup, and `<app>/<issue number>-<slug>` for small changes, bugs, and docs-only work. Factory work uses `factory/<issue number>-<slug>`.
 - Every commit ends with `Agent:` and `Issue:` trailers.
-- Agents never rebase, force-push, approve pull requests, or merge. Only the TPM opens pull requests, and only with `tracker pr-open`, as [factory ADR 0029](../docs/adr/0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md) explains. If a branch needs changes from `master`, the TPM asks the human.
+- Agents never rebase, force-push, approve pull requests, or merge. Only the TPM, and the factory-maintainer for factory work, open pull requests, and only with `tracker pr-open`, as [factory ADR 0029](../docs/adr/0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md) explains. If a branch needs changes from `master`, the TPM asks the human.
 - When the repository has a remote, agents push the work branch. Without a remote, no pull request can exist. The human starts the review by telling the TPM the branch is ready, and merges it locally. The code review verdict then goes on the issue, because no pull request exists.
 
 ## Limits
