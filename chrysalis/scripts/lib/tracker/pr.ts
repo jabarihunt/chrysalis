@@ -1,11 +1,16 @@
-// Posts the code review gate's verdict on a GitHub pull request, as a comment and a commit status.
-// Agents can't run gh, so the tracker CLI calls it for them. See factory ADR 0026.
+// Opens and edits GitHub pull requests for the TPM, and posts the code review gate's verdict on them
+// as a comment and a commit status. Agents can't run gh, so the tracker CLI calls it for them. Nothing
+// here approves or merges a pull request. See factory ADRs 0026 and 0029.
 import { run } from "../proc";
+import { parseRepoUrl } from "./github";
 import { TrackerError, commentHeader, parseHeader, parsePrUrl } from "./rules";
 import type { Verdict } from "./rules";
 
 /** The commit status a GitHub rule can require before a merge. */
 export const REVIEW_STATUS = "chrysalis/code-review";
+
+/** Pull requests merge into the primary branch. */
+export const BASE_BRANCH = "master";
 
 type PrComment = { body: string; url?: string; viewerDidAuthor?: boolean };
 type PrView = { state: string; headRefOid: string; url: string; comments?: PrComment[] };
@@ -73,4 +78,58 @@ export async function postPrVerdict(prUrl: string, verdict: Verdict & { body: st
     `target_url=${commentUrl}`,
   ]);
   return { pr: view.url, commit: view.headRefOid, state, comment_url: commentUrl, reused_comment: reused };
+}
+
+async function revParse(root: string, ref: string): Promise<string | null> {
+  const result = await run(["git", "rev-parse", "--verify", "--quiet", `${ref}^{commit}`], { cwd: root });
+  return result.code === 0 ? result.stdout.trim() : null;
+}
+
+/** The GitHub repository that origin points at, where the pull request opens. */
+async function originRepo(root: string): Promise<string> {
+  const origin = await run(["git", "remote", "get-url", "origin"], { cwd: root });
+  if (origin.code !== 0) throw new TrackerError("This repository has no origin remote, so the CLI can't open a pull request.");
+  const repo = parseRepoUrl(origin.stdout);
+  if (!repo) throw new TrackerError(`origin isn't a GitHub repository: ${origin.stdout.trim()}.`);
+  return repo;
+}
+
+/**
+ * The commit origin has for the branch, from this clone's remote-tracking ref. Refuses a branch that
+ * was never pushed, or whose local head differs from origin's, so the pull request shows the work.
+ */
+async function pushedHead(root: string, branch: string): Promise<string> {
+  const remote = await revParse(root, `refs/remotes/origin/${branch}`);
+  if (!remote) throw new TrackerError(`This clone has no origin/${branch}. Push the branch with git push -u origin ${branch}, then open the pull request.`);
+  const local = await revParse(root, `refs/heads/${branch}`);
+  if (local && local !== remote) {
+    throw new TrackerError(`${branch} is at ${local.slice(0, 7)}, but origin/${branch} is at ${remote.slice(0, 7)}. Push the branch, then open the pull request.`);
+  }
+  return remote;
+}
+
+export type OpenedPr = { pr: string; title: string; head: string; base: string; commit: string };
+
+/** Opens a pull request from the pushed branch into master, and returns its URL. */
+export async function openPr(root: string, branch: string, title: string, body: string): Promise<OpenedPr> {
+  const repo = await originRepo(root);
+  const commit = await pushedHead(root, branch);
+  const out = await gh(["pr", "create", "--repo", repo, "--base", BASE_BRANCH, "--head", branch, "--title", title, "--body-file", "-"], `${body}\n`);
+  const lines = out.split("\n").map((line) => line.trim()).reverse();
+  const pr = lines.map(parsePrUrl).find((parsed) => parsed !== null);
+  if (!pr) throw new TrackerError(`gh pr create printed no pull request URL: ${out.trim()}`);
+  return { pr: pr.url, title, head: branch, base: BASE_BRANCH, commit };
+}
+
+/** Changes an open pull request's title, body, or both. */
+export async function editPr(prUrl: string, change: { title?: string; body?: string }): Promise<{ pr: string; title: boolean; body: boolean }> {
+  const pr = parsePrUrl(prUrl);
+  if (!pr) throw new TrackerError(`The pr field must be a GitHub pull request URL, such as https://github.com/owner/repo/pull/12. Got "${prUrl}".`);
+  const view = JSON.parse(await gh(["pr", "view", String(pr.number), "--repo", pr.repo, "--json", "state,url"])) as { state: string; url: string };
+  if (view.state !== "OPEN") throw new TrackerError(`${view.url} is ${view.state.toLowerCase()}, so its title and body stay as they are.`);
+  const args = ["pr", "edit", String(pr.number), "--repo", pr.repo];
+  if (change.title !== undefined) args.push("--title", change.title);
+  if (change.body !== undefined) args.push("--body-file", "-");
+  await gh(args, change.body !== undefined ? `${change.body}\n` : undefined);
+  return { pr: view.url, title: change.title !== undefined, body: change.body !== undefined };
 }
