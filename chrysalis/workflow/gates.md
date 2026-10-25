@@ -10,7 +10,7 @@ A gate decides whether work moves to the next step. Agent gates post a verdict o
 | 4 | RED review | Code review agent | Same as the RED check |
 | 5 | Security | Security agent | Setup, slices, small changes, and bugs |
 | 6 | Test | Test agent | Setup, slices, small changes, and bugs |
-| 7 | Code review | Code review agent | Everything |
+| 7 | Code review | Code review agent | Everything, including factory changes |
 
 ## Verdicts
 
@@ -106,6 +106,8 @@ The agent also confirms that:
 Until `check.ts` exists, the agent writes "check.ts: not built yet" under the verdict's Checks and doesn't block on it. TODO(factory#9): Remove this exception once `check.ts` exists.
 
 The agent blocks on any spec-axis finding, a missing link, a write-scope violation, or a breach of a documented standard. It reports code smells without blocking.
+
+Every factory pull request goes through this gate, and the factory-maintainer is the fix owner for its findings. The human may waive the gate for one factory pull request. The factory-maintainer then records the waiver as a `decision` comment on the issue, in the human's words, before setting `ready-to-merge`. [Factory ADR 0028](../docs/adr/0028-factory-pull-requests-go-through-code-review.md) explains why.
 
 ## Automated checks
 

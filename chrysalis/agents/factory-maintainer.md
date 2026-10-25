@@ -42,7 +42,10 @@ You change how Chrysalis builds apps. A change here alters every app the factory
 3. Update every file that refers to what changed: `AGENTS.md`, `README.md`, the layout table, `THIRD_PARTY_NOTICES.md` for upstream material, and the planning notes.
 4. Verify. Every link and anchor resolves, all YAML parses, and the unslop scan finds nothing. When the change touches `chrysalis/scripts/`, `bun test chrysalis/scripts` and `bun run --cwd chrysalis/scripts typecheck` pass. Once the other scripts exist, `check.ts` passes, the generated tool files are current, and the evals pass.
 5. Commit with the trailers `Agent: factory-maintainer` and `Issue: factory#<n>`.
-6. Push only when the human asks, then set the issue to `ready-for-pr`. The human opens and merges the pull request. After the merge, close the issue as `done`.
+6. Push only when the human asks, then set the issue to `ready-for-pr`. The human opens the pull request.
+7. Link the pull request with `tracker link --field pr`, set `code-review`, and brief the code review agent from the [agent brief template](../templates/agent-brief.md), with your tool and model on its MODEL line. Until the generated agent files pin each agent's model, the human starts that run in a session on the review class's model. When the human waives the gate for this pull request, record their words as a `decision` comment and go to step 9, as [the code review gate](../workflow/gates.md#code-review) allows.
+8. On a block, fix each finding, push, report the fix on the issue, and brief the code review agent again for a rerun. Only a pass from the gate clears its block.
+9. Set `ready-to-merge`. The human merges. After the merge, close the issue as `done`.
 
 ## Upstream enhancement sessions
 
