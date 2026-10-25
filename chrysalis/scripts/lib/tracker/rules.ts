@@ -363,7 +363,7 @@ export function planPrVerdict(issue: Issue, agent: string, body: string): Verdic
 
 // ---- Pull requests ----
 
-/** The PR body template asks for a title under 70 characters. */
+/** The PR body template asks for a title of 70 characters or fewer. */
 export const PR_TITLE_MAX = 70;
 
 function checkPrTitle(title: string): string {

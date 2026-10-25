@@ -6,8 +6,8 @@ This file defines how a human request becomes merged code. The TPM runs the pipe
 
 | Role | Does | Agent file |
 |---|---|---|
-| Human | Makes requests. Approves cuts, acceptance criteria, PRDs, and ARDs. Answers escalations. Opens and merges pull requests. | None |
-| TPM | Talks to the human, classifies requests, writes briefs, sets the order of work, changes issue statuses, routes questions, and escalates. Writes no product code. | `chrysalis/agents/tpm.md` |
+| Human | Makes requests. Approves cuts, acceptance criteria, PRDs, and ARDs. Answers escalations. Merges pull requests. | None |
+| TPM | Talks to the human, classifies requests, writes briefs, sets the order of work, changes issue statuses, opens pull requests, routes questions, and escalates. Writes no product code. | `chrysalis/agents/tpm.md` |
 | Spec writer | Writes PRDs, ARDs, feature briefs, cuts, slice specs, ADRs, and the glossary. Writes for agents. | `chrysalis/agents/spec-writer.md` |
 | Documentation | Writes docs for people: guides, the README, the changelog, and PR bodies. | `chrysalis/agents/documentation.md` |
 | Database | Writes schema changes and migrations. | `chrysalis/agents/database.md` |
@@ -80,7 +80,7 @@ flowchart TD
   IMPL --> SEC{Security gate}
   SEC -->|pass| TEST{Test gate}
   TEST -->|pass| DOC[Documentation agent updates docs]
-  DOC --> PR([Human opens the pull request])
+  DOC --> PR[TPM opens the pull request]
   PR --> CR{Code review gate}
   CR -->|pass| MERGE([Human merges])
   MERGE -->|slices remain| SPEC
@@ -102,9 +102,9 @@ flowchart TD
 9. **Implement.** The TPM picks the implementers the spec's layer list names, in the order database, backend, frontend. It sets `implementing` and briefs one implementer at a time. Each implementer writes its own unit tests test-first, commits, and reports. Implementers leave acceptance tests unchanged. The last implementer runs the whole acceptance suite.
 10. **Security gate.** The TPM sets `security-review` and briefs the security agent.
 11. **Test gate.** The TPM sets `test-review` and briefs the test agent.
-12. **Docs.** The TPM sets `docs` and briefs the documentation agent. The agent updates the docs for people and returns the PR body in its report. The TPM posts the body alone in a `report` comment on the issue.
-13. **Pull request.** The TPM sets `ready-for-pr`, and gives the human the branch name and the PR body's comment on the issue. The human copies the body from there and opens the pull request.
-14. **Code review gate.** The TPM links the pull request with `tracker link --field pr`, sets `code-review`, and briefs the code review agent. In a repository with a remote, the tracker CLI refuses `code-review` until the issue links the pull request. The agent posts its verdict on the pull request, as [the verdict rules](gates.md#verdicts) require.
+12. **Docs.** The TPM sets `docs` and briefs the documentation agent. The agent updates the docs for people and returns the PR body in its report.
+13. **Pull request.** The TPM sets `ready-for-pr` and opens the pull request with `tracker pr-open`, with the PR body from the documentation agent's report and a title of 70 characters or fewer. `pr-open` checks that origin has the work branch at its last commit, and links the pull request to the issue.
+14. **Code review gate.** The TPM sets `code-review`, and briefs the code review agent. In a repository with a remote, the tracker CLI refuses `code-review` until the issue links the pull request. The agent posts its verdict on the pull request, as [the verdict rules](gates.md#verdicts) require.
 15. **Merge.** On a pass, the TPM sets `ready-to-merge`. The human merges.
 16. **Close.** The TPM sets the slice issue to `done`, runs the stack's slice-end command if one exists, and posts a `retro` comment. The retro names what blocked, what the human corrected, and what an agent got wrong. For a code review block, it gives the cause in one sentence and the rule it missed, and links the verdict on the pull request for the findings. If the cut has slices left, the TPM returns to step 4. After the last slice, it sets the request issue to `done`.
 
@@ -146,7 +146,7 @@ Only the TPM changes statuses, with one exception. A gate agent sets `blocked` w
 | `security-review` | setup, slice, small-change, bug | The security gate is running. |
 | `test-review` | setup, slice, small-change, bug | The test gate is running. |
 | `docs` | setup, slice, small-change, bug, docs | The documentation agent is working. |
-| `ready-for-pr` | all except request | Waiting for the human to open the pull request. |
+| `ready-for-pr` | all except request | The branch is pushed, and the TPM opens the pull request next. |
 | `code-review` | all except request | The code review gate is running. |
 | `ready-to-merge` | all except request | Waiting for the human to merge. |
 | `blocked` | all except request | A gate blocked. The `blocked_by` field names the gate. |
@@ -162,7 +162,7 @@ Only the TPM changes statuses, with one exception. A gate agent sets `blocked` w
 | Acceptance criteria | Feature step 6, small-change step 2 | A `decision` comment with the approved spec's commit SHA |
 | PRD and ARD | App setup, and any slice or docs-only change to them | A `decision` comment with the commit SHA |
 | Escalation answers | Whenever the TPM escalates | A `decision` comment. Lasting decisions also become an ADR. |
-| Opening and merging pull requests | Feature steps 13 and 15 | The pull request link, through `tracker link` |
+| Merging pull requests | Feature step 15 | Nothing new. `tracker pr-open` linked the pull request at step 13. |
 
 ## Briefs, reports, and questions
 
@@ -207,8 +207,8 @@ To escalate, the TPM saves the current status in `prior_status`, sets `needs-hum
 - `master` is the primary branch. Only humans merge into it, through a pull request merged with a merge commit. The `protect-master` ruleset in `.github/rulesets/protect-master.json` enforces this on GitHub, and [factory ADR 0025](../docs/adr/0025-master-takes-merge-commit-pull-requests.md) explains why squash and rebase merges are off.
 - Branch names are `<app>/<feature>-<NN>` for slices, `<app>/setup` for app setup, and `<app>/<issue number>-<slug>` for small changes, bugs, and docs-only work. Factory work uses `factory/<issue number>-<slug>`.
 - Every commit ends with `Agent:` and `Issue:` trailers.
-- Agents never rebase, force-push, open pull requests, or merge. If a branch needs changes from `master`, the TPM asks the human.
-- When the repository has a remote, agents push the work branch. Without a remote, the human opens a pull request by telling the TPM the branch is ready for review, and merges it locally. The code review verdict then goes on the issue, because no pull request exists.
+- Agents never rebase, force-push, approve pull requests, or merge. Only the TPM opens pull requests, and only with `tracker pr-open`, as [factory ADR 0029](../docs/adr/0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md) explains. If a branch needs changes from `master`, the TPM asks the human.
+- When the repository has a remote, agents push the work branch. Without a remote, no pull request can exist. The human starts the review by telling the TPM the branch is ready, and merges it locally. The code review verdict then goes on the issue, because no pull request exists.
 
 ## Limits
 

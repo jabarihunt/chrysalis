@@ -26,5 +26,6 @@
   "0025-master-takes-merge-commit-pull-requests.md": "1d9a45ff70e126e341105a4c742184fe8aa1cc5206dc3532d163be32088a855c",
   "0026-code-review-verdicts-go-on-the-pull-request.md": "69c7ee810770d08063c4f2094fd8992dc5af4faeb13c0909627ad61275195a98",
   "0027-gates-differ-from-every-class-they-review.md": "d2f443aacb89813598e597a01824aa28426654264c61dcf29169c42f761e44b1",
-  "0028-factory-pull-requests-go-through-code-review.md": "cf578f357ce6415e5cc66125ee1bd6a3c985879824c0fffc7b42c08aa669e8d8"
+  "0028-factory-pull-requests-go-through-code-review.md": "cf578f357ce6415e5cc66125ee1bd6a3c985879824c0fffc7b42c08aa669e8d8",
+  "0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md": "27becf746517bb78c33244f6227e3db7620408292a4f125d2f30f8a19f0f7a66"
 }

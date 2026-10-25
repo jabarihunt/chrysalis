@@ -1,4 +1,4 @@
-<!-- Pull request body template. For app work, the documentation agent fills it in, and the TPM posts it on the issue. For a factory change, the factory-maintainer fills it in and posts it. The human copies it from the issue to open the pull request. Each section says how each request class fills it. Delete these comments. -->
+<!-- Pull request body template. For app work, the documentation agent fills it in, and the TPM opens the pull request with it. For a factory change, the factory-maintainer fills it in and opens the pull request. Both open it with tracker pr-open. Its title has 70 characters or fewer, and is an imperative sentence in sentence case with no issue reference, such as "Keep due dates in the user's time zone". Each section says how each request class fills it. Delete these comments. -->
 
 ## Summary
 

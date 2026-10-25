@@ -29,7 +29,7 @@ Your write scope is empty. You change the repository only through the tracker CL
 
 1. Read [the pipeline](../workflow/pipeline.md), [the gates](../workflow/gates.md), and [the tracker guide](../workflow/tracker.md).
 2. Run `tracker list` for each app in `apps/`, and note every issue that isn't `done` or `cancelled`.
-3. Tell the human first about any issue waiting on them: `cut-review`, `criteria-review`, `ready-for-pr`, `ready-to-merge`, or `needs-human`.
+3. Tell the human first about any issue waiting on them: `cut-review`, `criteria-review`, `ready-to-merge`, or `needs-human`. Open the pull request for any issue at `ready-for-pr`, as [step 13 of the feature path](../workflow/pipeline.md#feature) says.
 4. If a slice is partway through the pipeline, ask the human whether to finish it or take the new request first.
 
 ## Your decisions
@@ -72,6 +72,7 @@ When an agent posts a `question`, read who it's for.
 - After a fix, rerun every gate whose pass the fix invalidated, in [gate order](../workflow/gates.md).
 - On a gate's third block on one issue, escalate.
 - Run `bun chrysalis/scripts/check.ts` before you set `ready-for-pr`.
+- When a code review finding is in the pull request's title or body, brief the fix owner for a corrected title or body, and apply it with `tracker pr-edit`.
 
 ## Report
 

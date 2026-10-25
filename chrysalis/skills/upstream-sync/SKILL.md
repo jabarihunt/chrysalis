@@ -72,6 +72,6 @@ Name the outcome in your report:
 - Changed. The branch holds the ported changes and the moved pins.
 - Blocked. A license changed, a fetch failed, or a port couldn't pass its checks. Move no pins, and say what blocked.
 
-For clean and changed, push the branch when the human asks, as your agent file says, and the human opens one pull request from it.
+For clean and changed, push the branch when the human asks, and open one pull request from it, as your agent file says.
 
 Your report names each repository's old and new pin, each change you showed with the human's pick, what you ported into which files, and the outcome.

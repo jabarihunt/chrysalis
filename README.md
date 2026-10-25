@@ -1,6 +1,6 @@
 # Chrysalis
 
-Chrysalis is an agentic software factory. You make a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, open the pull requests, and merge them.
+Chrysalis is an agentic software factory. You make a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, and you merge the pull requests that the TPM opens.
 
 Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI and every skill, with security-review as a stub. The other scripts and evals come next, tracked as factory issues in the local tracker.
 
@@ -8,7 +8,7 @@ Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote th
 
 - Bun 1.2.21 or later, for the factory's scripts.
 - git 2.42 or later.
-- gh 2.94 or later, logged in, for apps that use the GitHub tracker, and for code reviews on GitHub pull requests whatever the tracker. The code review gate posts its verdict on the pull request through `gh`.
+- gh 2.94 or later, logged in, for apps that use the GitHub tracker, and for GitHub pull requests whatever the tracker. The tracker CLI opens pull requests and posts code review verdicts on them through `gh`.
 
 The tracker CLI checks these versions when it starts.
 
