@@ -1,4 +1,4 @@
-<!-- Pull request body template. For app work, the documentation agent fills it in and posts it on the issue. For a factory change, the factory-maintainer does. The human copies it from the issue to open the pull request. Each section says how each request class fills it. Delete these comments. -->
+<!-- Pull request body template. For app work, the documentation agent fills it in, and the TPM posts it on the issue. For a factory change, the factory-maintainer fills it in and posts it. The human copies it from the issue to open the pull request. Each section says how each request class fills it. Delete these comments. -->
 
 ## Summary
 
