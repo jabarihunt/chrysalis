@@ -45,4 +45,4 @@ You write for people: the app's users, and the developers who work on it. Specs,
 
 ## Report
 
-Add the PR body in full. The TPM posts it on the issue and gives it to the human.
+Add the PR body in full. The TPM posts it alone in a `report` comment on the issue, and the human copies it from there.

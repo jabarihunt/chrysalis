@@ -84,7 +84,7 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 
 | Type | Posted by | Holds |
 |---|---|---|
-| `report` | TPM, after each agent run | A summary of the agent's report. After a code review run, only a link to the verdict on the pull request. |
+| `report` | TPM, after each agent run | A summary of the agent's report. After a code review run, only a link to the verdict on the pull request. A PR body goes alone in a `report` comment of its own, so the human can copy it whole. |
 | `question` | Any agent | One question and who should answer it |
 | `answer` | The agent that answered, or the TPM relaying the human | The answer, quoting the question |
 | `verdict` | Gate agents | A [gate verdict](../templates/gate-verdict.md). The CLI refuses one without the template's `Gate:`, `Verdict:`, and `Commit:` lines, or from an agent that doesn't run that gate. Code review verdicts go on the pull request instead, as [Code review verdicts](#code-review-verdicts) describes. |

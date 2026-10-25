@@ -102,8 +102,8 @@ flowchart TD
 9. **Implement.** The TPM picks the implementers the spec's layer list names, in the order database, backend, frontend. It sets `implementing` and briefs one implementer at a time. Each implementer writes its own unit tests test-first, commits, and reports. Implementers leave acceptance tests unchanged. The last implementer runs the whole acceptance suite.
 10. **Security gate.** The TPM sets `security-review` and briefs the security agent.
 11. **Test gate.** The TPM sets `test-review` and briefs the test agent.
-12. **Docs.** The TPM sets `docs` and briefs the documentation agent. The agent updates the docs for people and posts the PR body on the issue.
-13. **Pull request.** The TPM sets `ready-for-pr` and gives the human the branch name and the PR body. The human opens the pull request.
+12. **Docs.** The TPM sets `docs` and briefs the documentation agent. The agent updates the docs for people and returns the PR body in its report. The TPM posts the body alone in a `report` comment on the issue.
+13. **Pull request.** The TPM sets `ready-for-pr`, and gives the human the branch name and the PR body's comment on the issue. The human copies the body from there and opens the pull request.
 14. **Code review gate.** The TPM links the pull request with `tracker link --field pr`, sets `code-review`, and briefs the code review agent. In a repository with a remote, the tracker CLI refuses `code-review` until the issue links the pull request. The agent posts its verdict on the pull request, as [the verdict rules](gates.md#verdicts) require.
 15. **Merge.** On a pass, the TPM sets `ready-to-merge`. The human merges.
 16. **Close.** The TPM sets the slice issue to `done`, runs the stack's slice-end command if one exists, and posts a `retro` comment. The retro names what blocked, what the human corrected, and what an agent got wrong. For a code review block, it gives the cause in one sentence and the rule it missed, and links the verdict on the pull request for the findings. If the cut has slices left, the TPM returns to step 4. After the last slice, it sets the request issue to `done`.

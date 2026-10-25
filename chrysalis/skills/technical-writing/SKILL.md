@@ -1,6 +1,6 @@
 ---
 name: technical-writing
-description: How to write docs for people, which are the app README, guides, the changelog, and pull request bodies. The documentation agent reads it before writing any of them.
+description: How to write docs for people, which are the app README, guides, the changelog, and pull request bodies. The documentation agent reads it before writing any of them, and the factory-maintainer before writing the factory's README or a factory pull request body.
 metadata:
   sources:
     - repo: cursor/plugins
@@ -12,12 +12,12 @@ metadata:
       commit: 49dd158d1076134a641b33efb035946536778336
       took: Showing the smallest view that makes a change clear, before and after evidence, and saying how hard a change is to reverse and what it could affect.
   license: MIT. See THIRD_PARTY_NOTICES.md at the repository root.
-  changes: Rewritten for the documentation agent and the Chrysalis PR body template. Rules that unslop already covers are left to unslop.
+  changes: Rewritten for the documentation agent, the factory-maintainer, and the Chrysalis PR body template. Rules that unslop already covers are left to unslop.
 ---
 
 # Technical writing
 
-Write so a tired developer understands on the first read. Your readers are the app's users and the developers who work on it, and they read your docs to get something done. Apply unslop to everything you write, and these rules on top of it.
+Write so a tired developer understands on the first read. Your readers are the app's users and the developers who work on it, or for factory docs, the people who run the factory. They read your docs to get something done. Apply unslop to everything you write, and these rules on top of it.
 
 ## Pick the mode first
 
@@ -64,7 +64,7 @@ Say what changed for the reader, in their words. "You can now set a due date on 
 
 Fill [the PR body template](../../templates/pr-body.md). The human reads it in about a minute before opening the pull request, so write a briefing, not a log.
 
-- In the summary, say what a user can now do. Then show the smallest view that makes the change clear: a short file tree, a call tree, a before-and-after sketch of a screen's structure, or a diagram. One or two views are enough.
+- In the summary, say what a user can now do, or for a factory change, what changes for the agents or for the human who runs the factory. Then show the smallest view that makes the change clear: a short file tree, a call tree, a before-and-after sketch of a screen's structure, or a diagram. One or two views are enough.
 - In "How to check it", give the steps or commands that show the change working, and what the reviewer sees before and after.
 - In "Risks and follow-ups", say how hard the change is to undo, and what else it could affect. A change that deletes data or alters a contract other code depends on is hard to reverse, and the human needs to know that before merging.
 - Link logs and long tables instead of pasting them.
