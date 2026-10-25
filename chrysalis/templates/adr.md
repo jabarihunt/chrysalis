@@ -11,7 +11,7 @@ A factory ADR never cites a tracker reference such as factory#7. Factory ADRs sh
 
 Write an ADR when a decision is hard to reverse, would surprise a reader without context, and came from a real tradeoff.
 
-status is proposed, accepted, or "superseded by NNNN". Once accepted, an ADR's decision is never edited. The only changes allowed are marking it superseded and updating paths or names after a rename.
+status is proposed, accepted, or "superseded by NNNN". Once accepted, an ADR's decision is never edited. The only changes allowed are marking it superseded and updating paths or names after a rename. For factory ADRs, `bun test chrysalis/scripts` enforces this against the fingerprints in `chrysalis/scripts/tests/adr-fingerprints.json`.
 
 Delete the optional sections when they add nothing. Delete these comments. -->
 
