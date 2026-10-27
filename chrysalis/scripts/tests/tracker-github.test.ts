@@ -8,9 +8,9 @@ afterEach(cleanup);
 
 const T = ["--app", "shop", "--agent", "tpm"];
 
-async function setup(opts: { version?: string; appYaml?: string } = {}) {
+async function setup(opts: { version?: string; appYaml?: string; origin?: string } = {}) {
   const repo = await makeRepo();
-  await sh(["git", "remote", "add", "origin", "git@github.com:acme/widgets.git"], repo);
+  await sh(["git", "remote", "add", "origin", opts.origin ?? "git@github.com:acme/widgets.git"], repo);
   writeApp(repo, "shop", opts.appYaml ?? "name: shop\ntracker:\n  type: github\n");
   const gh = fakeGh({ version: opts.version });
   const cli = (args: string[], input?: string) => tracker(repo, args, { input, env: gh.env });
@@ -18,6 +18,17 @@ async function setup(opts: { version?: string; appYaml?: string } = {}) {
 }
 
 describe("the GitHub adapter", () => {
+  test("reads the repository from an origin with a token, and never prints the token", async () => {
+    const withToken = await setup({ origin: "https://x-access-token:SECRET@github.com/acme/widgets.git" });
+    const created = await withToken.cli(["create", ...T, "--kind", "request", "--title", "Checkout", "--body-file", "-"], "r");
+    expect(created.json).toMatchObject({ ref: "shop#1", location: "https://github.com/acme/widgets/issues/1" });
+
+    const elsewhere = await setup({ origin: "https://x-access-token:SECRET@evil.example/github.com/acme/widgets.git" });
+    const refused = await elsewhere.cli(["list", ...T]);
+    expect(refused.error).toBe("origin isn't a GitHub repository: https://***@evil.example/github.com/acme/widgets.git. Set tracker.repo in app.yaml.");
+    expect(refused.stderr + refused.stdout).not.toContain("SECRET");
+  });
+
   test("create adds the labels, writes the fields block, and returns the reference", async () => {
     const { gh, cli } = await setup();
     const result = await cli(["create", ...T, "--kind", "request", "--title", "Checkout", "--body-file", "-"], "## Request\n\nAdd checkout.");

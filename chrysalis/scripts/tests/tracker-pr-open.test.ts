@@ -118,6 +118,20 @@ describe("pr-open", () => {
     }
   });
 
+  test("opens from an origin with a token, and leaves the token out of its output and errors", async () => {
+    const { open, creates } = await setup({ origin: "https://x-access-token:SECRET@github.com/acme/todo.git" });
+    const opened = await open();
+    expect(opened.json).toMatchObject({ ref: "todo#1", pr: PR });
+    expect(creates()[0]).toContain("acme/todo");
+    expect(opened.stdout + opened.stderr).not.toContain("SECRET");
+
+    const elsewhere = await setup({ origin: "https://x-access-token:SECRET@evil.example/acme/todo.git" });
+    const refused = await elsewhere.open();
+    expect(refused.error).toBe("origin isn't a GitHub repository: https://***@evil.example/acme/todo.git.");
+    expect(refused.stdout + refused.stderr).not.toContain("SECRET");
+    expect(elsewhere.creates()).toEqual([]);
+  });
+
   test("without a remote no pull request can exist, and pr-open checks for gh", async () => {
     expect((await (await setup({ remote: false })).open()).error).toContain("has no remote, so no pull request can exist");
     expect((await (await setup({ ghVersion: "2.80.0" })).open()).error).toContain("gh 2.94.0 or later is required");

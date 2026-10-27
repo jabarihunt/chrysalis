@@ -1,6 +1,6 @@
 // Unit tests for the tracker's rules and file formats.
 import { describe, expect, test } from "bun:test";
-import { composeBody, parseRepoUrl, splitBody } from "../lib/tracker/github";
+import { composeBody, parseRepoUrl, redactUrl, splitBody } from "../lib/tracker/github";
 import { formatIssueFile, parseIssueFile, slugify } from "../lib/tracker/local";
 import { TrackerError, applyChange, checkBody, emptyFields, parsePrUrl, parseVerdict, planClose, planComment, planCreate, planLink, planPrVerdict, planSet } from "../lib/tracker/rules";
 import type { Issue, Kind, Status } from "../lib/tracker/rules";
@@ -276,10 +276,22 @@ describe("bodies and formats", () => {
     expect(parseRepoUrl("https://github.com/acme/widgets")).toBe("acme/widgets");
     expect(parseRepoUrl("ssh://git@github.com/acme/my.site.git\n")).toBe("acme/my.site");
     expect(parseRepoUrl("git@gitlab.com:acme/widgets.git")).toBeNull();
+    // An HTTPS origin may carry a username or token before github.com.
+    expect(parseRepoUrl("https://x-access-token:SECRET@github.com/acme/widgets.git")).toBe("acme/widgets");
+    expect(parseRepoUrl("https://octocat@github.com/acme/widgets")).toBe("acme/widgets");
     // A URL on another host that only contains github.com isn't GitHub.
     expect(parseRepoUrl("https://evil.example/github.com/acme/widgets.git")).toBeNull();
     expect(parseRepoUrl("https://github.com.evil.example/acme/widgets")).toBeNull();
+    expect(parseRepoUrl("https://github.com@evil.example/acme/widgets")).toBeNull();
+    expect(parseRepoUrl("https://a@b@github.com/acme/widgets")).toBeNull();
     expect(parseRepoUrl("git@evil.example:github.com/acme/widgets.git")).toBeNull();
+  });
+
+  test("error messages show an origin URL without its username or token", () => {
+    expect(redactUrl("https://x-access-token:SECRET@evil.example/acme/widgets.git\n")).toBe("https://***@evil.example/acme/widgets.git");
+    expect(redactUrl("ssh://deploy@evil.example/acme/widgets.git")).toBe("ssh://***@evil.example/acme/widgets.git");
+    expect(redactUrl("https://evil.example/acme/widgets.git")).toBe("https://evil.example/acme/widgets.git");
+    expect(redactUrl("git@gitlab.com:acme/widgets.git")).toBe("git@gitlab.com:acme/widgets.git");
   });
 
   test("slugs are short, lowercase, and never empty", () => {

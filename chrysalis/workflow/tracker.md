@@ -98,13 +98,13 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 
 The TPM, or the factory-maintainer for factory issues, opens each pull request with `pr-open`, and the human merges it. [Factory ADR 0029](../docs/adr/0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md) explains why. `pr-open` refuses to run unless:
 
-- the repository has a remote, and origin's URL starts with `https://github.com/`, `git@github.com:`, or `ssh://git@github.com/`,
+- the repository has a remote, and origin's URL starts with `https://github.com/`, `https://<user or token>@github.com/`, `git@github.com:`, or `ssh://git@github.com/`,
 - the issue is `ready-for-pr`, links a branch, and links no pull request yet,
 - this clone has the branch and `origin/<branch>`, at the same commit, so origin has every commit,
 - the title is 70 characters or fewer, with no line breaks, carriage returns, tabs, or other control characters,
 - the body has the line `Issue: <ref>` for this issue, exactly as the PR body template shows and on a line of its own.
 
-It then opens the pull request from the branch into `master`, sets the issue's `pr` field, and prints the pull request, the title, the branch, and the head commit. If `gh` refuses, as when the branch already has an open pull request, the issue links nothing.
+It then opens the pull request from the branch into `master`, sets the issue's `pr` field, and prints the pull request, the title, the branch, and the head commit. If `gh` refuses, as when the branch already has an open pull request, the issue links nothing. The GitHub adapter reads origin the same way when `app.yaml` sets no `tracker.repo`. When either one refuses origin, its error shows `***` in place of any username or token in the URL.
 
 `pr-edit` changes the linked pull request's title, body, or both, with the same checks on each. It runs while the issue is `ready-for-pr` or `code-review`, or while the code review gate's block stands, so the gate reviews the title and body that merge. It refuses a pull request that isn't open.
 
