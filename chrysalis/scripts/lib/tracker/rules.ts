@@ -410,8 +410,9 @@ export function planPrOpen(issue: Issue, agent: string, input: { title: string; 
 }
 
 /**
- * Changes the linked pull request's title or body, such as after a code review finding. Only while
- * the code review gate runs or its block stands, so the gate reviews the title and body that merge.
+ * Changes the linked pull request's title or body, such as after a code review finding. Only before
+ * or during the code review gate, or while its block stands. Every edit also withdraws any code review
+ * pass, as editPr in pr.ts does, so the gate reviews the title and body that merge.
  */
 export function planPrEdit(issue: Issue, agent: string, input: { title?: string; body?: string }): { title?: string; body?: string } {
   requireManager(issue.app, agent, "edit pull requests");

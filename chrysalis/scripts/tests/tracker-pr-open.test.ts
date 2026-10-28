@@ -163,11 +163,11 @@ describe("pr-open", () => {
 });
 
 describe("pr-edit", () => {
-  test("fixes the title or body while the code review runs or its block stands, and not after it passes", async () => {
+  test("fixes the title or body before the code review and while its block stands, and refuses once the issue is ready-to-merge", async () => {
     const { gh, cli, head, open } = await setup();
     await open();
     const edit = (args: string[], input?: string) => cli(["pr-edit", "todo#1", ...TPM, ...args], input);
-    expect((await edit(["--title", "Keep due dates fixed"])).json).toEqual({ ref: "todo#1", pr: PR, title: true, body: false });
+    expect((await edit(["--title", "Keep due dates fixed"])).json).toEqual({ ref: "todo#1", pr: PR, commit: head, title: true, body: false, review_status: "pending" });
     expect(gh.state().prs[0]).toMatchObject({ title: "Keep due dates fixed", body: body() });
     expect((await edit([])).error).toContain("needs --title, --body-file, or both");
 
@@ -175,7 +175,7 @@ describe("pr-edit", () => {
     await cli(["pr-verdict", "todo#1", ...CR, "--body-file", "-"], verdict("block", head.slice(0, 7)));
     await cli(["set", "todo#1", ...CR, "--status", "blocked", "--gate", "code-review"]);
     const fixed = body().replace("shift by a day", "shift by a day after midnight");
-    expect((await edit(["--body-file", "-"], fixed)).json).toEqual({ ref: "todo#1", pr: PR, title: false, body: true });
+    expect((await edit(["--body-file", "-"], fixed)).json).toEqual({ ref: "todo#1", pr: PR, commit: head, title: false, body: true, review_status: "pending" });
     expect(gh.state().prs[0]!.body).toBe(fixed);
 
     await cli(["pr-verdict", "todo#1", ...CR, "--body-file", "-"], verdict("pass", head.slice(0, 7)));
@@ -183,6 +183,44 @@ describe("pr-edit", () => {
     await cli(["set", "todo#1", ...TPM, "--status", "ready-to-merge"]);
     expect((await edit(["--title", "Late change"])).error).toContain("todo#1 is ready-to-merge. Edit its pull request only before or during the code review gate");
     expect(gh.state().prs[0]!.title).toBe("Keep due dates fixed");
+  });
+
+  test("an edit after a pass withdraws it, on every path back to an editable status, until the code review runs again", async () => {
+    const { gh, cli, head, open } = await setup();
+    await open();
+    const reviewStatus = () => gh.state().statuses.filter((s) => s.sha === head && s.context === "chrysalis/code-review").at(-1);
+    const pass = () => cli(["pr-verdict", "todo#1", ...CR, "--body-file", "-"], verdict("pass", head.slice(0, 7)));
+    const edit = (title: string) => cli(["pr-edit", "todo#1", ...TPM, "--title", title]);
+
+    // A pass leaves the issue at code-review, and an edit there sets the status back to pending.
+    await cli(["set", "todo#1", ...TPM, "--status", "code-review"]);
+    await pass();
+    expect(reviewStatus()).toMatchObject({ state: "success" });
+    expect((await edit("Keep due dates in the local time zone")).json).toMatchObject({ review_status: "pending" });
+    expect(reviewStatus()).toEqual({ sha: head, state: "pending", context: "chrysalis/code-review", description: "Title or body changed after the last verdict. Rerun the code review.", target_url: PR });
+    expect(gh.state().prs[0]!.title).toBe("Keep due dates in the local time zone");
+
+    // Only a new code review run makes it success again.
+    await pass();
+    expect(reviewStatus()).toMatchObject({ state: "success" });
+
+    // Moving the issue back to ready-for-pr after a pass doesn't keep an edit from withdrawing it.
+    await cli(["set", "todo#1", ...TPM, "--status", "ready-for-pr"]);
+    await edit("Keep due dates in the user's time zone");
+    expect(reviewStatus()).toMatchObject({ state: "pending" });
+    expect(gh.state().statuses.map((s) => s.state)).toEqual(["success", "pending", "success", "pending"]);
+  });
+
+  test("when the status can't be withdrawn, the title and body stay as they were", async () => {
+    const { gh, cli, head, open } = await setup();
+    await open();
+    await cli(["set", "todo#1", ...TPM, "--status", "code-review"]);
+    await cli(["pr-verdict", "todo#1", ...CR, "--body-file", "-"], verdict("pass", head.slice(0, 7)));
+    gh.setState({ ...gh.state(), failStatuses: true });
+    expect((await cli(["pr-edit", "todo#1", ...TPM, "--title", "Late change"])).error).toContain(`gh api repos/acme/todo/statuses/${head} failed`);
+    expect(gh.state().prs[0]!.title).toBe(TITLE);
+    expect(gh.calls().filter((call) => call[0] === "pr" && call[1] === "edit")).toEqual([]);
+    expect(gh.state().statuses.map((s) => s.state)).toEqual(["success"]);
   });
 
   test("refuses other agents, an issue with no pull request, a body without the issue, and a merged pull request", async () => {

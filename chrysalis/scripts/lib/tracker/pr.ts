@@ -123,15 +123,38 @@ export async function openPr(root: string, branch: string, title: string, body: 
   return { pr: pr.url, title, head: branch, base: BASE_BRANCH, commit };
 }
 
-/** Changes an open pull request's title, body, or both. */
-export async function editPr(prUrl: string, change: { title?: string; body?: string }): Promise<{ pr: string; title: boolean; body: boolean }> {
+/** The status description pr-edit sets, which withdraws any code review pass on the head commit. */
+export const EDITED_DESCRIPTION = "Title or body changed after the last verdict. Rerun the code review.";
+
+export type EditedPr = { pr: string; commit: string; title: boolean; body: boolean; review_status: "pending" };
+
+/**
+ * Changes an open pull request's title, body, or both. The code review gate reads the title and
+ * body, so first it sets the code review status on the head commit to pending, which withdraws any
+ * pass. Only then does it edit, so a failed status call leaves the pull request as it was.
+ */
+export async function editPr(prUrl: string, change: { title?: string; body?: string }): Promise<EditedPr> {
   const pr = parsePrUrl(prUrl);
   if (!pr) throw new TrackerError(`The pr field must be a GitHub pull request URL, such as https://github.com/owner/repo/pull/12. Got "${prUrl}".`);
-  const view = JSON.parse(await gh(["pr", "view", String(pr.number), "--repo", pr.repo, "--json", "state,url"])) as { state: string; url: string };
+  const view = JSON.parse(await gh(["pr", "view", String(pr.number), "--repo", pr.repo, "--json", "state,url,headRefOid"])) as { state: string; url: string; headRefOid: string };
   if (view.state !== "OPEN") throw new TrackerError(`${view.url} is ${view.state.toLowerCase()}, so its title and body stay as they are.`);
+  await gh([
+    "api",
+    `repos/${pr.repo}/statuses/${view.headRefOid}`,
+    "--method",
+    "POST",
+    "-f",
+    "state=pending",
+    "-f",
+    `context=${REVIEW_STATUS}`,
+    "-f",
+    `description=${EDITED_DESCRIPTION}`,
+    "-f",
+    `target_url=${view.url}`,
+  ]);
   const args = ["pr", "edit", String(pr.number), "--repo", pr.repo];
   if (change.title !== undefined) args.push("--title", change.title);
   if (change.body !== undefined) args.push("--body-file", "-");
   await gh(args, change.body !== undefined ? `${change.body}\n` : undefined);
-  return { pr: view.url, title: change.title !== undefined, body: change.body !== undefined };
+  return { pr: view.url, commit: view.headRefOid, title: change.title !== undefined, body: change.body !== undefined, review_status: "pending" };
 }

@@ -72,7 +72,7 @@ When an agent posts a `question`, read who it's for.
 - After a fix, rerun every gate whose pass the fix invalidated, in [gate order](../workflow/gates.md).
 - On a gate's third block on one issue, escalate.
 - Run `bun chrysalis/scripts/check.ts` before you set `ready-for-pr`.
-- When a code review finding is in the pull request's title or body, brief the fix owner for a corrected title or body, and apply it with `tracker pr-edit`.
+- When a code review finding is in the pull request's title or body, brief the fix owner for a corrected title or body, and apply it with `tracker pr-edit`. Every edit withdraws any code review pass, so brief the code review agent again after it, even after a pass.
 
 ## Report
 

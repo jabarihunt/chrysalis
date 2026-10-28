@@ -24,7 +24,7 @@ When it starts, the CLI checks the tool versions that [the README](../../README.
 | `link <ref> --field <field> --value <value>` | Sets `spec`, `spec_sha`, `red_sha`, `branch`, or `pr`. `--value none` clears the field. | TPM |
 | `close <ref> --status <done or cancelled>` | Sets the final status and closes the issue | TPM |
 | `pr-open <ref> --title <title> --body-file <path or ->` | Opens the issue's pull request and links it. See [Pull requests](#pull-requests). | TPM |
-| `pr-edit <ref> [--title <title>] [--body-file <path or ->]` | Changes the title or body of the issue's pull request. See [Pull requests](#pull-requests). | TPM |
+| `pr-edit <ref> [--title <title>] [--body-file <path or ->]` | Changes the title or body of the issue's pull request, and withdraws any code review pass. See [Pull requests](#pull-requests). | TPM |
 | `pr-verdict <ref> --body-file <path or ->` | Posts the code review verdict on the issue's pull request and sets its commit status. See [Code review verdicts](#code-review-verdicts). | Code review agent |
 
 The CLI checks the last column against `--agent`. Its pull request commands open a pull request, change its title or body, comment, and set a commit status. It has no command that approves or merges a pull request, and no command deletes an issue or a comment.
@@ -106,7 +106,7 @@ The TPM, or the factory-maintainer for factory issues, opens each pull request w
 
 It then opens the pull request from the branch into `master`, sets the issue's `pr` field, and prints the pull request, the title, the branch, and the head commit. If `gh` refuses, as when the branch already has an open pull request, the issue links nothing. The GitHub adapter reads origin the same way when `app.yaml` sets no `tracker.repo`. When either one refuses origin, its error lists the forms above and leaves out origin's URL, because the URL can hold a username or token. To see the URL, run `git remote get-url origin`.
 
-`pr-edit` changes the linked pull request's title, body, or both, with the same checks on each. It runs while the issue is `ready-for-pr` or `code-review`, or while the code review gate's block stands, so the gate reviews the title and body that merge. It refuses a pull request that isn't open.
+`pr-edit` changes the linked pull request's title, body, or both, with the same checks on each. It runs while the issue is `ready-for-pr` or `code-review`, or while the code review gate's block stands, and refuses a pull request that isn't open. Before it changes anything, it sets the `chrysalis/code-review` status on the head commit to `pending`, with "Title or body changed after the last verdict. Rerun the code review." That withdraws any pass, as [the verdict rules](gates.md#verdicts) say, so the code review gate runs again before the human merges. If the status call fails, `pr-edit` changes nothing. It prints the pull request, the head commit, what changed, and `review_status`.
 
 ## Code review verdicts
 

@@ -5,7 +5,7 @@ date: 2026-10-25
 
 # 0029. The TPM and the factory-maintainer open pull requests
 
-The TPM opens each app pull request, and the factory-maintainer opens each factory pull request, with its title and body, through the tracker CLI's `pr-open` command. `pr-edit` changes the title or body until the code review passes. The human still merges every pull request into `master`, and still starts each code review run. The factory-maintainer still pushes only when the human asks, and opens the pull request right after that push. This supersedes 0004, which left opening pull requests to the human.
+The TPM opens each app pull request, and the factory-maintainer opens each factory pull request, with its title and body, through the tracker CLI's `pr-open` command. `pr-edit` changes the title or body, and withdraws any code review pass, so the gate runs again on the title and body that merge. The human still merges every pull request into `master`, and still starts each code review run. The factory-maintainer still pushes only when the human asks, and opens the pull request right after that push. This supersedes 0004, which left opening pull requests to the human.
 
 Under 0004, the human copied each PR body from chat or from the issue into GitHub. That step added nothing the human decides, since the body is the agent's work. Once, a body copied from chat came through cut off, and the code review blocked on it. The code review gate checks the body, so each body finding also meant an edit by hand.
 
