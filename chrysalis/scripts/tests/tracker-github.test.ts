@@ -1,8 +1,8 @@
 // End-to-end tests for the tracker CLI with the GitHub adapter. Every test runs against the fake gh in
 // fake-gh.ts, so no test calls GitHub.
 import { afterEach, describe, expect, test } from "bun:test";
-import { splitBody } from "../lib/tracker/github";
-import { cleanup, fakeGh, makeRepo, sh, tracker, writeApp } from "./helpers";
+import { NOT_GITHUB_ORIGIN, splitBody } from "../lib/tracker/github";
+import { SECRET_ORIGINS, cleanup, fakeGh, makeRepo, sh, tracker, writeApp } from "./helpers";
 
 afterEach(cleanup);
 
@@ -22,11 +22,15 @@ describe("the GitHub adapter", () => {
     const withToken = await setup({ origin: "https://x-access-token:SECRET@github.com/acme/widgets.git" });
     const created = await withToken.cli(["create", ...T, "--kind", "request", "--title", "Checkout", "--body-file", "-"], "r");
     expect(created.json).toMatchObject({ ref: "shop#1", location: "https://github.com/acme/widgets/issues/1" });
+    expect(created.stderr + created.stdout).not.toContain("SECRET");
+  });
 
-    const elsewhere = await setup({ origin: "https://x-access-token:SECRET@evil.example/github.com/acme/widgets.git" });
-    const refused = await elsewhere.cli(["list", ...T]);
-    expect(refused.error).toBe("origin isn't a GitHub repository: https://***@evil.example/github.com/acme/widgets.git. Set tracker.repo in app.yaml.");
-    expect(refused.stderr + refused.stdout).not.toContain("SECRET");
+  test("a refused origin's username or token never reaches the output, in any form git accepts", async () => {
+    for (const origin of [...SECRET_ORIGINS, "https://x-access-token:SECRET@evil.example/github.com/acme/widgets.git"]) {
+      const refused = await (await setup({ origin })).cli(["list", ...T]);
+      expect(refused.error).toBe(`${NOT_GITHUB_ORIGIN} Or set tracker.repo in app.yaml.`);
+      expect(refused.stderr + refused.stdout).not.toContain("SECRET");
+    }
   });
 
   test("create adds the labels, writes the fields block, and returns the reference", async () => {

@@ -2,7 +2,7 @@
 // as a comment and a commit status. Agents can't run gh, so the tracker CLI calls it for them. Nothing
 // here approves or merges a pull request. See factory ADRs 0026 and 0029.
 import { run } from "../proc";
-import { parseRepoUrl, redactUrl } from "./github";
+import { NOT_GITHUB_ORIGIN, parseRepoUrl } from "./github";
 import { TrackerError, commentHeader, parseHeader, parsePrUrl } from "./rules";
 import type { Verdict } from "./rules";
 
@@ -90,7 +90,7 @@ async function originRepo(root: string): Promise<string> {
   const origin = await run(["git", "remote", "get-url", "origin"], { cwd: root });
   if (origin.code !== 0) throw new TrackerError("This repository has no origin remote, so the CLI can't open a pull request.");
   const repo = parseRepoUrl(origin.stdout);
-  if (!repo) throw new TrackerError(`origin isn't a GitHub repository: ${redactUrl(origin.stdout)}.`);
+  if (!repo) throw new TrackerError(NOT_GITHUB_ORIGIN);
   return repo;
 }
 

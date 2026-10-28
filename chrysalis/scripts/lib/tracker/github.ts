@@ -52,10 +52,12 @@ export function parseRepoUrl(url: string): string | null {
   return match ? `${match[1]}/${match[2]}` : null;
 }
 
-/** A remote URL for an error message, with any username or token before the host replaced by ***. */
-export function redactUrl(url: string): string {
-  return url.trim().replace(/^([A-Za-z][A-Za-z0-9+.-]*:\/\/)[^@/\s]+@/, "$1***@");
-}
+/**
+ * The error for an origin that parseRepoUrl refuses. It leaves out origin's URL, which can hold a
+ * username or token in more forms than any redaction covers, and names the forms that work instead.
+ */
+export const NOT_GITHUB_ORIGIN =
+  "origin isn't a GitHub repository. Its URL must start with https://github.com/, https://<user or token>@github.com/, git@github.com:, or ssh://git@github.com/. To see it, run git remote get-url origin.";
 
 export class GitHubAdapter implements Adapter {
   private labels: Set<string> | null = null;
@@ -72,7 +74,7 @@ export class GitHubAdapter implements Adapter {
       const origin = await run(["git", "remote", "get-url", "origin"], { cwd: root });
       if (origin.code !== 0) throw new TrackerError(`app.yaml sets no tracker.repo, and this repository has no origin remote.`);
       repo = parseRepoUrl(origin.stdout) ?? undefined;
-      if (!repo) throw new TrackerError(`origin isn't a GitHub repository: ${redactUrl(origin.stdout)}. Set tracker.repo in app.yaml.`);
+      if (!repo) throw new TrackerError(`${NOT_GITHUB_ORIGIN} Or set tracker.repo in app.yaml.`);
     }
     if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) throw new TrackerError(`tracker.repo must look like owner/repo. Got "${repo}".`);
     return new GitHubAdapter(repo, app);

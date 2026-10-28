@@ -4,8 +4,9 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { NOT_GITHUB_ORIGIN } from "../lib/tracker/github";
 import { emptyState } from "./fake-gh";
-import { cleanup, fakeGh, makeRepo, sh, tracker, writeApp } from "./helpers";
+import { SECRET_ORIGINS, cleanup, fakeGh, makeRepo, sh, tracker, writeApp } from "./helpers";
 
 afterEach(cleanup);
 
@@ -78,11 +79,18 @@ describe("pr-open", () => {
     expect((await open(TPM, body(), "Two\nlines")).error).toContain("one line");
     expect((await open(TPM, body(), "One\rTwo")).error).toContain("no line breaks, carriage returns, tabs, or other control characters");
     expect((await open(TPM, body(), "One\tTwo")).error).toContain("no line breaks, carriage returns, tabs, or other control characters");
+    // A control character counts wherever it is, even where trimming would remove it, and so do the
+    // C1 controls and the Unicode line and paragraph separators.
+    for (const title of ["Fix it\r", "\rFix it", "Fix it\n", "Fix\u0085it", "Fix\u009fit", "Fix\u2028it", "Fix\u2029it"]) {
+      expect((await open(TPM, body(), title)).error).toContain("no line breaks, carriage returns, tabs, or other control characters");
+    }
     expect((await open(TPM, "## Summary\n\nNo issue line.\n")).error).toContain(`"Issue: todo#1" line`);
-    // Only the template's line counts: "Issue: todo#1" exactly, on a line of its own.
-    for (const line of ["Issue: todo#12", "Issue:todo#1", "Issue: todo#1 extra", "Issue: todo#1, which also does todo#2", " Issue: todo#1", "Issues: todo#1"]) {
+    // Only the template's line counts: "Issue: todo#1" exactly, on a line of its own, with nothing after it.
+    for (const line of ["Issue: todo#12", "Issue:todo#1", "Issue: todo#1 extra", "Issue: todo#1, which also does todo#2", " Issue: todo#1", "Issues: todo#1", "Issue: todo#1   ", "Issue: todo#1\t"]) {
       expect((await open(TPM, `## Summary\n\nText.\n\n${line}\nSpec: None\n`)).error).toContain(`"Issue: todo#1" line, exactly and on its own line`);
     }
+    // Trailing spaces on the body's last line count too, though trimming the body would remove them.
+    expect((await open(TPM, "## Summary\n\nText.\n\nIssue: todo#1   ")).error).toContain(`"Issue: todo#1" line, exactly and on its own line`);
 
     await cli(["set", "todo#1", ...TPM, "--status", "needs-human"]);
     expect((await open()).error).toContain("todo#1 is needs-human. Set ready-for-pr");
@@ -110,26 +118,30 @@ describe("pr-open", () => {
     expect(creates()).toEqual([]);
   });
 
-  test("refuses an origin that only looks like GitHub", async () => {
+  test("refuses an origin that only looks like GitHub, and names the forms that work", async () => {
     for (const origin of ["https://evil.example/github.com/acme/todo.git", "git@evil.example:github.com/acme/todo.git"]) {
       const { open, creates } = await setup({ origin });
-      expect((await open()).error).toContain(`origin isn't a GitHub repository: ${origin}`);
+      expect((await open()).error).toBe(NOT_GITHUB_ORIGIN);
       expect(creates()).toEqual([]);
     }
   });
 
-  test("opens from an origin with a token, and leaves the token out of its output and errors", async () => {
+  test("opens from an origin with a token, and leaves the token out of its output", async () => {
     const { open, creates } = await setup({ origin: "https://x-access-token:SECRET@github.com/acme/todo.git" });
     const opened = await open();
     expect(opened.json).toMatchObject({ ref: "todo#1", pr: PR });
     expect(creates()[0]).toContain("acme/todo");
     expect(opened.stdout + opened.stderr).not.toContain("SECRET");
+  });
 
-    const elsewhere = await setup({ origin: "https://x-access-token:SECRET@evil.example/acme/todo.git" });
-    const refused = await elsewhere.open();
-    expect(refused.error).toBe("origin isn't a GitHub repository: https://***@evil.example/acme/todo.git.");
-    expect(refused.stdout + refused.stderr).not.toContain("SECRET");
-    expect(elsewhere.creates()).toEqual([]);
+  test("a refused origin's username or token never reaches the output, in any form git accepts", async () => {
+    for (const origin of SECRET_ORIGINS) {
+      const { open, creates } = await setup({ origin });
+      const refused = await open();
+      expect(refused.error).toBe(NOT_GITHUB_ORIGIN);
+      expect(refused.stdout + refused.stderr).not.toContain("SECRET");
+      expect(creates()).toEqual([]);
+    }
   });
 
   test("without a remote no pull request can exist, and pr-open checks for gh", async () => {

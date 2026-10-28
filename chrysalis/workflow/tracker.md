@@ -101,10 +101,10 @@ The TPM, or the factory-maintainer for factory issues, opens each pull request w
 - the repository has a remote, and origin's URL starts with `https://github.com/`, `https://<user or token>@github.com/`, `git@github.com:`, or `ssh://git@github.com/`,
 - the issue is `ready-for-pr`, links a branch, and links no pull request yet,
 - this clone has the branch and `origin/<branch>`, at the same commit, so origin has every commit,
-- the title is 70 characters or fewer, with no line breaks, carriage returns, tabs, or other control characters,
-- the body has the line `Issue: <ref>` for this issue, exactly as the PR body template shows and on a line of its own.
+- the title is 70 characters or fewer after `pr-open` trims its leading and trailing spaces, and has no line breaks, carriage returns, tabs, or other control characters anywhere, including the Unicode line and paragraph separators,
+- the body has the line `Issue: <ref>` for this issue, exactly as the PR body template shows, on a line of its own, with nothing after it, trailing spaces included.
 
-It then opens the pull request from the branch into `master`, sets the issue's `pr` field, and prints the pull request, the title, the branch, and the head commit. If `gh` refuses, as when the branch already has an open pull request, the issue links nothing. The GitHub adapter reads origin the same way when `app.yaml` sets no `tracker.repo`. When either one refuses origin, its error shows `***` in place of any username or token in the URL.
+It then opens the pull request from the branch into `master`, sets the issue's `pr` field, and prints the pull request, the title, the branch, and the head commit. If `gh` refuses, as when the branch already has an open pull request, the issue links nothing. The GitHub adapter reads origin the same way when `app.yaml` sets no `tracker.repo`. When either one refuses origin, its error lists the forms above and leaves out origin's URL, because the URL can hold a username or token. To see the URL, run `git remote get-url origin`.
 
 `pr-edit` changes the linked pull request's title, body, or both, with the same checks on each. It runs while the issue is `ready-for-pr` or `code-review`, or while the code review gate's block stands, so the gate reviews the title and body that merge. It refuses a pull request that isn't open.
 
