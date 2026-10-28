@@ -19,7 +19,7 @@ The factory is a draft. If a file your agent file lists doesn't exist yet, such 
 - During app work, only the TPM talks to the human. Every other agent posts questions on the issue through the tracker CLI, and the TPM routes them.
 - Product decisions belong to the human. When something is unclear, ask on the issue and wait for the answer.
 - Commit only on the work branch. End every commit message with two trailers, `Agent: <your agent name>` and `Issue: <issue reference>`.
-- Humans open and merge pull requests. Agents push work branches only, and leave `master` to the human.
+- Humans merge pull requests. The TPM, and the factory-maintainer for factory work, open them with `tracker pr-open`. Agents push work branches only, and leave `master` to the human.
 - Cite an issue in every `TODO` comment, as in `TODO(todo#12)`.
 - Save new dependencies at exact versions.
 - Reach secrets only through the app's environment. Keep secret values out of output, logs, and commits, and use test-mode keys only.

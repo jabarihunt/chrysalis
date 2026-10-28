@@ -41,10 +41,23 @@ export function splitBody(text: string, where: string): { fields: Fields; body: 
   return { fields: readFields(data, where), body: normalized.slice(end + FIELDS_CLOSE.length).trim() };
 }
 
+/**
+ * Reads owner/repo from a GitHub remote URL in one of git's three forms for GitHub, and nothing else.
+ * The HTTPS form may carry a username or token before the host, which stays out of the result.
+ */
 export function parseRepoUrl(url: string): string | null {
-  const match = url.trim().match(/github\.com[:/]([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?$/);
+  const match = url
+    .trim()
+    .match(/^(?:https:\/\/(?:[^@/\s]+@)?github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?$/);
   return match ? `${match[1]}/${match[2]}` : null;
 }
+
+/**
+ * The error for an origin that parseRepoUrl refuses. It leaves out origin's URL, which can hold a
+ * username or token in more forms than any redaction covers, and names the forms that work instead.
+ */
+export const NOT_GITHUB_ORIGIN =
+  "origin isn't a GitHub repository. Its URL must start with https://github.com/, https://<user or token>@github.com/, git@github.com:, or ssh://git@github.com/. To see it, run git remote get-url origin.";
 
 export class GitHubAdapter implements Adapter {
   private labels: Set<string> | null = null;
@@ -61,7 +74,7 @@ export class GitHubAdapter implements Adapter {
       const origin = await run(["git", "remote", "get-url", "origin"], { cwd: root });
       if (origin.code !== 0) throw new TrackerError(`app.yaml sets no tracker.repo, and this repository has no origin remote.`);
       repo = parseRepoUrl(origin.stdout) ?? undefined;
-      if (!repo) throw new TrackerError(`origin isn't a GitHub repository: ${origin.stdout.trim()}. Set tracker.repo in app.yaml.`);
+      if (!repo) throw new TrackerError(`${NOT_GITHUB_ORIGIN} Or set tracker.repo in app.yaml.`);
     }
     if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) throw new TrackerError(`tracker.repo must look like owner/repo. Got "${repo}".`);
     return new GitHubAdapter(repo, app);

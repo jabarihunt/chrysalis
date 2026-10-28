@@ -276,6 +276,15 @@ describe("bodies and formats", () => {
     expect(parseRepoUrl("https://github.com/acme/widgets")).toBe("acme/widgets");
     expect(parseRepoUrl("ssh://git@github.com/acme/my.site.git\n")).toBe("acme/my.site");
     expect(parseRepoUrl("git@gitlab.com:acme/widgets.git")).toBeNull();
+    // An HTTPS origin may carry a username or token before github.com.
+    expect(parseRepoUrl("https://x-access-token:SECRET@github.com/acme/widgets.git")).toBe("acme/widgets");
+    expect(parseRepoUrl("https://octocat@github.com/acme/widgets")).toBe("acme/widgets");
+    // A URL on another host that only contains github.com isn't GitHub.
+    expect(parseRepoUrl("https://evil.example/github.com/acme/widgets.git")).toBeNull();
+    expect(parseRepoUrl("https://github.com.evil.example/acme/widgets")).toBeNull();
+    expect(parseRepoUrl("https://github.com@evil.example/acme/widgets")).toBeNull();
+    expect(parseRepoUrl("https://a@b@github.com/acme/widgets")).toBeNull();
+    expect(parseRepoUrl("git@evil.example:github.com/acme/widgets.git")).toBeNull();
   });
 
   test("slugs are short, lowercase, and never empty", () => {

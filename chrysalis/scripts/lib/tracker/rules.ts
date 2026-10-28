@@ -260,7 +260,7 @@ export function planSet(issue: Issue, agent: string, target: string, gate: strin
   if (agent !== manager) return fail(`Only ${manager} changes statuses for app "${issue.app}", apart from gate agents' blocks.`);
   if (gate) fail("--gate is for gate agents.");
   if (to === "code-review" && !issue.pr && repo.hasRemote) {
-    fail(`${issue.ref} links no pull request. Link it with link --field pr before you set code-review, so the code review verdict goes on the pull request.`);
+    fail(`${issue.ref} links no pull request. Open it with pr-open, or link it with link --field pr, before you set code-review, so the code review verdict goes on the pull request.`);
   }
   if (issue.status === "needs-human") {
     if (to !== issue.prior_status) fail(`${issue.ref} returns from needs-human to its prior status, ${issue.prior_status}.`);
@@ -323,7 +323,7 @@ export function planComment(issue: Issue, agent: string, type: string, body: str
       fail(`${issue.ref} links the pull request ${issue.pr}, so post the code review verdict there with pr-verdict.`);
     }
     if (verdict.gate === "code-review" && repo.hasRemote) {
-      fail(`This repository has a remote, so the code review verdict goes on the pull request with pr-verdict, not on ${issue.ref}. The TPM links the pull request with link --field pr.`);
+      fail(`This repository has a remote, so the code review verdict goes on the pull request with pr-verdict, not on ${issue.ref}. The TPM opens the pull request with pr-open.`);
     }
   }
   return { type: t, body: body.trim() };
@@ -352,13 +352,81 @@ export function planPrVerdict(issue: Issue, agent: string, body: string): Verdic
   const running = issue.status === "code-review" || (issue.status === "blocked" && issue.blocked_by === "code-review");
   if (!running) fail(`${issue.ref} is ${issue.status}. The code review gate runs while the status is code-review, or while its own block stands.`);
   if (!issue.pr) {
-    fail(`${issue.ref} has no pull request link. The TPM links it with link --field pr. Only a repository with no remote takes the code review verdict on the issue, with comment --type verdict.`);
+    fail(`${issue.ref} has no pull request link. The TPM opens it with pr-open. Only a repository with no remote takes the code review verdict on the issue, with comment --type verdict.`);
   }
   if (!body.trim()) fail("The verdict can't be empty.");
   checkBody(body, "verdict");
   const verdict = parseVerdict(body);
   if (verdict.gate !== "code-review") fail(`pr-verdict posts only code review verdicts. The ${verdict.gate} gate posts on the issue with comment --type verdict.`);
   return { ...verdict, body: body.trim() };
+}
+
+// ---- Pull requests ----
+
+/** The PR body template asks for a title of 70 characters or fewer. */
+export const PR_TITLE_MAX = 70;
+
+// Line breaks, carriage returns, tabs, and every other control character: C0, DEL, C1, and the
+// Unicode line and paragraph separators.
+const CONTROL = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/;
+
+/** Checks the title as given, before trimming, so no control character is trimmed away unseen. Then trims only spaces. */
+function checkPrTitle(title: string): string {
+  if (CONTROL.test(title)) fail("The pull request title must be one line, with no line breaks, carriage returns, tabs, or other control characters.");
+  const t = title.replace(/^ +| +$/g, "");
+  if (!t) fail("The pull request title can't be empty.");
+  if (t.length > PR_TITLE_MAX) fail(`The pull request title must be ${PR_TITLE_MAX} characters or fewer, as the PR body template says. This one has ${t.length}.`);
+  return t;
+}
+
+/**
+ * The body must hold the template's "Issue: <ref>" line for this issue, exactly and on its own line,
+ * so the code review can find it. The lines are read before the body is trimmed, so trailing spaces
+ * on a last line can't be trimmed away unseen.
+ */
+function checkPrBody(issue: Issue, body: string): string {
+  const b = body.trim();
+  if (!b) fail("The pull request body can't be empty.");
+  const line = `Issue: ${issue.ref}`;
+  if (!body.split(/\r?\n/).some((l) => l === line)) {
+    fail(`The pull request body needs the PR body template's "${line}" line, exactly and on its own line. Name any other issue in the summary.`);
+  }
+  return b;
+}
+
+/**
+ * The TPM, or the factory-maintainer for factory issues, opens the pull request once the branch is
+ * pushed and the issue is ready-for-pr. The CLI opens and edits pull requests, but never approves or
+ * merges one. See factory ADR 0029.
+ */
+export function planPrOpen(issue: Issue, agent: string, input: { title: string; body: string }, repo: RepoFacts = WITH_REMOTE): { title: string; body: string } {
+  requireManager(issue.app, agent, "open pull requests");
+  if (FINAL_STATUSES.includes(issue.status)) fail(`${issue.ref} is closed as ${issue.status}.`);
+  if (!repo.hasRemote) fail("This repository has no remote, so no pull request can exist. The human merges the branch locally.");
+  if (issue.status !== "ready-for-pr") fail(`${issue.ref} is ${issue.status}. Set ready-for-pr before you open its pull request.`);
+  if (!issue.branch) fail(`${issue.ref} links no branch. Link it with link --field branch first.`);
+  if (issue.pr) fail(`${issue.ref} already links ${issue.pr}. Change its title or body with pr-edit.`);
+  return { title: checkPrTitle(input.title), body: checkPrBody(issue, input.body) };
+}
+
+/**
+ * Changes the linked pull request's title or body, such as after a code review finding. Only before
+ * or during the code review gate, or while its block stands. Every edit also withdraws any code review
+ * pass, as editPr in pr.ts does, so the gate reviews the title and body that merge.
+ */
+export function planPrEdit(issue: Issue, agent: string, input: { title?: string; body?: string }): { title?: string; body?: string } {
+  requireManager(issue.app, agent, "edit pull requests");
+  if (FINAL_STATUSES.includes(issue.status)) fail(`${issue.ref} is closed as ${issue.status}.`);
+  if (!issue.pr) fail(`${issue.ref} links no pull request. Open one with pr-open.`);
+  const reviewing = issue.status === "ready-for-pr" || issue.status === "code-review" || (issue.status === "blocked" && issue.blocked_by === "code-review");
+  if (!reviewing) {
+    fail(`${issue.ref} is ${issue.status}. Edit its pull request only before or during the code review gate, or while that gate's block stands, so the gate reviews the final title and body.`);
+  }
+  if (input.title === undefined && input.body === undefined) fail("pr-edit needs --title, --body-file, or both.");
+  const out: { title?: string; body?: string } = {};
+  if (input.title !== undefined) out.title = checkPrTitle(input.title);
+  if (input.body !== undefined) out.body = checkPrBody(issue, input.body);
+  return out;
 }
 
 export function applyChange(issue: Issue, change: Change): Issue {

@@ -7,6 +7,17 @@ import { emptyState } from "./fake-gh";
 import type { FakeState } from "./fake-gh";
 
 export const CLI = resolve(import.meta.dir, "..", "tracker.ts");
+
+/**
+ * Origins on a host other than github.com that carry the word SECRET as a username or token, in each
+ * form git accepts: a scheme with userinfo, ssh with userinfo, and the scp-like user@host:path.
+ */
+export const SECRET_ORIGINS = [
+  "https://x-access-token:SECRET@evil.example/acme/todo.git",
+  "https://SECRET@github.com.evil.example/acme/todo.git",
+  "ssh://deploy:SECRET@evil.example/acme/todo.git",
+  "SECRET@evil.example:acme/todo.git",
+];
 const FAKE_GH = resolve(import.meta.dir, "fake-gh.ts");
 
 const scratch: string[] = [];

@@ -62,7 +62,7 @@ Say what changed for the reader, in their words. "You can now set a due date on 
 
 ## Write the pull request body as a briefing
 
-Fill [the PR body template](../../templates/pr-body.md). The human reads it in about a minute before opening the pull request, so write a briefing, not a log.
+Fill [the PR body template](../../templates/pr-body.md). The human reads it in about a minute before reviewing and merging the pull request, so write a briefing, not a log.
 
 - In the summary, say what a user can now do, or for a factory change, what changes for the agents or for the human who runs the factory. Then show the smallest view that makes the change clear: a short file tree, a call tree, a before-and-after sketch of a screen's structure, or a diagram. One or two views are enough.
 - In "How to check it", give the steps or commands that show the change working, and what the reviewer sees before and after.

@@ -12,7 +12,7 @@ Each app has one tracker, named in its `app.yaml`. Agents reach every tracker th
 
 `bun chrysalis/scripts/tracker.ts` is the tracker CLI. Every command takes `--app <app>` and `--agent <agent name>`. The CLI reads the app's `app.yaml` to pick the adapter and prints JSON on standard output. On an error, it prints `{"error": "..."}` on standard error and exits with code 1, or with code 2 for bad usage. `--body-file -` reads the body from standard input, so agents with no write scope, such as the TPM and the gate agents, can create issues and post comments without writing a file.
 
-When it starts, the CLI checks the tool versions that [the README](../../README.md#requirements) lists. It checks `gh` for the GitHub tracker, and for `pr-verdict` whatever the tracker.
+When it starts, the CLI checks the tool versions that [the README](../../README.md#requirements) lists. It checks `gh` for the GitHub tracker, and for `pr-open`, `pr-edit`, and `pr-verdict` whatever the tracker.
 
 | Command | Does | Who may run it |
 |---|---|---|
@@ -23,9 +23,11 @@ When it starts, the CLI checks the tool versions that [the README](../../README.
 | `set <ref> --status <status> [--gate <gate>]` | Changes the status | TPM. A gate agent sets `blocked` with `--gate`, and clears its own block. See [Status rules](#status-rules). |
 | `link <ref> --field <field> --value <value>` | Sets `spec`, `spec_sha`, `red_sha`, `branch`, or `pr`. `--value none` clears the field. | TPM |
 | `close <ref> --status <done or cancelled>` | Sets the final status and closes the issue | TPM |
+| `pr-open <ref> --title <title> --body-file <path or ->` | Opens the issue's pull request and links it. See [Pull requests](#pull-requests). | TPM |
+| `pr-edit <ref> [--title <title>] [--body-file <path or ->]` | Changes the title or body of the issue's pull request, and withdraws any code review pass. See [Pull requests](#pull-requests). | TPM |
 | `pr-verdict <ref> --body-file <path or ->` | Posts the code review verdict on the issue's pull request and sets its commit status. See [Code review verdicts](#code-review-verdicts). | Code review agent |
 
-The CLI checks the last column against `--agent`. Its one pull request command, `pr-verdict`, only comments and sets a commit status. It has no command that opens, approves, or merges a pull request, and no command deletes an issue or a comment.
+The CLI checks the last column against `--agent`. Its pull request commands open a pull request, change its title or body, comment, and set a commit status. It has no command that approves or merges a pull request, and no command deletes an issue or a comment.
 
 ## The factory app
 
@@ -73,7 +75,7 @@ An issue reference is `<app>#<number>`, as in `todo#12` or `factory#3`. With the
 | `spec_sha` | The commit SHA of the approved spec |
 | `red_sha` | The commit SHA of the RED commit that passed the RED review |
 | `branch` | The work branch |
-| `pr` | The pull request's GitHub URL, such as `https://github.com/owner/repo/pull/12`, once the human opens it. `link` refuses any other URL. |
+| `pr` | The pull request's GitHub URL, such as `https://github.com/owner/repo/pull/12`. `pr-open` sets it. `link` also takes one, for a pull request the human opened, and refuses any other URL. |
 | `blocked_by` | The gate that blocked, while the status is `blocked` |
 | `blocks` | The number of blocks per gate, such as `security: 1` |
 | `prior_status` | The status to return to, while the status is `needs-human` |
@@ -84,13 +86,27 @@ Every comment starts with a header line in the form `<type> from <agent> at <ISO
 
 | Type | Posted by | Holds |
 |---|---|---|
-| `report` | TPM, after each agent run | A summary of the agent's report. After a code review run, only a link to the verdict on the pull request. A PR body goes alone in a `report` comment of its own, so the human can copy it whole. |
+| `report` | TPM, after each agent run | A summary of the agent's report. After a code review run, only a link to the verdict on the pull request. |
 | `question` | Any agent | One question and who should answer it |
 | `answer` | The agent that answered, or the TPM relaying the human | The answer, quoting the question |
 | `verdict` | Gate agents | A [gate verdict](../templates/gate-verdict.md). The CLI refuses one without the template's `Gate:`, `Verdict:`, and `Commit:` lines, or from an agent that doesn't run that gate. Code review verdicts go on the pull request instead, as [Code review verdicts](#code-review-verdicts) describes. |
 | `escalation` | TPM | An [escalation](../templates/escalation.md) |
 | `decision` | TPM | A human decision or approval in the human's words, with any commit SHA it covers |
 | `retro` | TPM, after merge | A [retro](../templates/retro.md): what blocked, what the human corrected, and what an agent got wrong. A code review block gets its cause in one sentence, the rule it missed, and a link to its verdict on the pull request, but none of its findings. |
+
+## Pull requests
+
+The TPM, or the factory-maintainer for factory issues, opens each pull request with `pr-open`, and the human merges it. [Factory ADR 0029](../docs/adr/0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md) explains why. `pr-open` refuses to run unless:
+
+- the repository has a remote, and origin's URL starts with `https://github.com/`, `https://<user or token>@github.com/`, `git@github.com:`, or `ssh://git@github.com/`,
+- the issue is `ready-for-pr`, links a branch, and links no pull request yet,
+- this clone has the branch and `origin/<branch>`, at the same commit, so origin has every commit,
+- the title is 70 characters or fewer after `pr-open` trims its leading and trailing spaces, and has no line breaks, carriage returns, tabs, or other control characters anywhere, including the Unicode line and paragraph separators,
+- the body has the line `Issue: <ref>` for this issue, exactly as the PR body template shows, on a line of its own, with nothing after it, trailing spaces included.
+
+It then opens the pull request from the branch into `master`, sets the issue's `pr` field, and prints the pull request, the title, the branch, and the head commit. If `gh` refuses, as when the branch already has an open pull request, the issue links nothing. The GitHub adapter reads origin the same way when `app.yaml` sets no `tracker.repo`. When either one refuses origin, its error lists the forms above and leaves out origin's URL, because the URL can hold a username or token. To see the URL, run `git remote get-url origin`.
+
+`pr-edit` changes the linked pull request's title, body, or both, with the same checks on each. It runs while the issue is `ready-for-pr` or `code-review`, or while the code review gate's block stands, and refuses a pull request that isn't open. Before it changes anything, it sets the `chrysalis/code-review` status on the head commit to `pending`, with "Title or body changed after the last verdict. Rerun the code review." That withdraws any pass, as [the verdict rules](gates.md#verdicts) say, so the code review gate runs again before the human merges. If the status call fails, `pr-edit` changes nothing. It prints the pull request, the head commit, what changed, and `review_status`.
 
 ## Code review verdicts
 

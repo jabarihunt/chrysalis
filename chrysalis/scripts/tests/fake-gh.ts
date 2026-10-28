@@ -1,7 +1,7 @@
 // A fake gh for the tracker's tests. It keeps one repository's labels, issues, pull requests, and
 // commit statuses in the JSON file named by FAKE_GH_STATE, appends each call's arguments to
-// FAKE_GH_LOG, and supports only the gh commands that the GitHub adapter and pr-verdict run. No call
-// reaches GitHub.
+// FAKE_GH_LOG, and supports only the gh commands that the GitHub adapter, pr-open, pr-edit, and
+// pr-verdict run. No call reaches GitHub.
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 
 export type FakeComment = { author: { login: string }; authorAssociation: string; viewerDidAuthor: boolean; body: string; createdAt: string };
@@ -16,7 +16,17 @@ export type FakeIssue = {
   parent: number | null;
 };
 export type FakePrComment = { body: string; url: string; viewerDidAuthor: boolean };
-export type FakePr = { number: number; state: "OPEN" | "CLOSED" | "MERGED"; headRefOid: string; comments: FakePrComment[] };
+export type FakePr = {
+  number: number;
+  state: "OPEN" | "CLOSED" | "MERGED";
+  headRefOid: string;
+  comments: FakePrComment[];
+  /** Set by gh pr create and gh pr edit. */
+  title?: string;
+  body?: string;
+  headRefName?: string;
+  baseRefName?: string;
+};
 export type FakeStatus = { sha: string; state: string; context: string; description: string; target_url: string };
 export type FakeState = {
   viewer: string;
@@ -27,6 +37,8 @@ export type FakeState = {
   statuses: FakeStatus[];
   /** When true, the statuses API fails, as a network error would. */
   failStatuses?: boolean;
+  /** The head commit of each branch on GitHub, for gh pr create. */
+  branches?: Record<string, string>;
 };
 
 export function emptyState(): FakeState {
@@ -80,6 +92,22 @@ function main(): number {
   const repo = one("repo");
   if (!repo) return fail("fake gh: every call needs --repo");
 
+  // gh pr create --repo <repo> --base <base> --head <branch> --title <title> --body-file -
+  if (words[0] === "pr" && words[1] === "create") {
+    const head = one("head")!;
+    const base = one("base")!;
+    const sha = state.branches?.[head];
+    if (!sha) return fail(`pull request create failed: GraphQL: Head sha can't be blank, Base sha can't be blank, No commits between ${base} and ${head}, Head ref must be a branch (createPullRequest)`);
+    const open = state.prs.find((p) => p.state === "OPEN" && p.headRefName === head && p.baseRefName === base);
+    if (open) return fail(`a pull request for branch "${head}" into branch "${base}" already exists:\nhttps://github.com/${repo}/pull/${open.number}`);
+    const pr: FakePr = { number: state.next++, state: "OPEN", headRefOid: sha, comments: [], title: one("title"), body: stdin(), headRefName: head, baseRefName: base };
+    state.prs.push(pr);
+    save();
+    console.error("Creating pull request for " + head + " into " + base + " in " + repo);
+    console.log(`https://github.com/${repo}/pull/${pr.number}`);
+    return 0;
+  }
+
   if (words[0] === "pr") {
     const pr = state.prs.find((p) => p.number === Number(words[2]));
     if (!pr) return fail(`GraphQL: Could not resolve to a PullRequest with the number of ${words[2]}. (repository.pullRequest)`);
@@ -94,6 +122,13 @@ function main(): number {
       pr.comments.push({ body: stdin(), url: commentUrl, viewerDidAuthor: true });
       save();
       console.log(commentUrl);
+      return 0;
+    }
+    if (words[1] === "edit") {
+      if (one("title") !== undefined) pr.title = one("title");
+      if (one("body-file") === "-") pr.body = stdin();
+      save();
+      console.log(prUrl);
       return 0;
     }
     return fail(`fake gh: unsupported command ${words.join(" ")}`);

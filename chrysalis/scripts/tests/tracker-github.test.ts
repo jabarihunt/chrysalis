@@ -1,16 +1,16 @@
 // End-to-end tests for the tracker CLI with the GitHub adapter. Every test runs against the fake gh in
 // fake-gh.ts, so no test calls GitHub.
 import { afterEach, describe, expect, test } from "bun:test";
-import { splitBody } from "../lib/tracker/github";
-import { cleanup, fakeGh, makeRepo, sh, tracker, writeApp } from "./helpers";
+import { NOT_GITHUB_ORIGIN, splitBody } from "../lib/tracker/github";
+import { SECRET_ORIGINS, cleanup, fakeGh, makeRepo, sh, tracker, writeApp } from "./helpers";
 
 afterEach(cleanup);
 
 const T = ["--app", "shop", "--agent", "tpm"];
 
-async function setup(opts: { version?: string; appYaml?: string } = {}) {
+async function setup(opts: { version?: string; appYaml?: string; origin?: string } = {}) {
   const repo = await makeRepo();
-  await sh(["git", "remote", "add", "origin", "git@github.com:acme/widgets.git"], repo);
+  await sh(["git", "remote", "add", "origin", opts.origin ?? "git@github.com:acme/widgets.git"], repo);
   writeApp(repo, "shop", opts.appYaml ?? "name: shop\ntracker:\n  type: github\n");
   const gh = fakeGh({ version: opts.version });
   const cli = (args: string[], input?: string) => tracker(repo, args, { input, env: gh.env });
@@ -18,6 +18,21 @@ async function setup(opts: { version?: string; appYaml?: string } = {}) {
 }
 
 describe("the GitHub adapter", () => {
+  test("reads the repository from an origin with a token, and never prints the token", async () => {
+    const withToken = await setup({ origin: "https://x-access-token:SECRET@github.com/acme/widgets.git" });
+    const created = await withToken.cli(["create", ...T, "--kind", "request", "--title", "Checkout", "--body-file", "-"], "r");
+    expect(created.json).toMatchObject({ ref: "shop#1", location: "https://github.com/acme/widgets/issues/1" });
+    expect(created.stderr + created.stdout).not.toContain("SECRET");
+  });
+
+  test("a refused origin's username or token never reaches the output, in any form git accepts", async () => {
+    for (const origin of [...SECRET_ORIGINS, "https://x-access-token:SECRET@evil.example/github.com/acme/widgets.git"]) {
+      const refused = await (await setup({ origin })).cli(["list", ...T]);
+      expect(refused.error).toBe(`${NOT_GITHUB_ORIGIN} Or set tracker.repo in app.yaml.`);
+      expect(refused.stderr + refused.stdout).not.toContain("SECRET");
+    }
+  });
+
   test("create adds the labels, writes the fields block, and returns the reference", async () => {
     const { gh, cli } = await setup();
     const result = await cli(["create", ...T, "--kind", "request", "--title", "Checkout", "--body-file", "-"], "## Request\n\nAdd checkout.");

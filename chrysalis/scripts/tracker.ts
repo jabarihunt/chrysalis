@@ -7,7 +7,7 @@ import { run } from "./lib/proc";
 import type { Adapter } from "./lib/tracker/adapter";
 import { GitHubAdapter } from "./lib/tracker/github";
 import { LocalAdapter } from "./lib/tracker/local";
-import { postPrVerdict } from "./lib/tracker/pr";
+import { editPr, openPr, postPrVerdict } from "./lib/tracker/pr";
 import {
   COMMENT_TYPE_NAMES,
   GATE_NAMES,
@@ -24,6 +24,8 @@ import {
   planComment,
   planCreate,
   planLink,
+  planPrEdit,
+  planPrOpen,
   planPrVerdict,
   planSet,
 } from "./lib/tracker/rules";
@@ -43,6 +45,8 @@ Commands:
   set <ref> --status <status> [--gate <gate>]
   link <ref> --field <field> --value <value>
   close <ref> --status <done or cancelled>
+  pr-open <ref> --title <title> --body-file <path or ->
+  pr-edit <ref> [--title <title>] [--body-file <path or ->]
   pr-verdict <ref> --body-file <path or ->
 
 Kinds: ${KINDS.join(", ")}
@@ -64,8 +68,12 @@ const COMMANDS: Record<string, Spec> = {
   set: { ref: true, required: ["status"], optional: ["gate"] },
   link: { ref: true, required: ["field", "value"], optional: [] },
   close: { ref: true, required: ["status"], optional: [] },
+  "pr-open": { ref: true, required: ["title", "body-file"], optional: [] },
+  "pr-edit": { ref: true, required: [], optional: ["title", "body-file"] },
   "pr-verdict": { ref: true, required: ["body-file"], optional: [] },
 };
+/** Commands that call gh even when the app uses the local tracker. */
+const PR_COMMANDS = new Set(["pr-open", "pr-edit", "pr-verdict"]);
 const OPTIONS = ["app", "agent", "kind", "title", "body-file", "parent", "status", "gate", "type", "field", "value"] as const;
 
 function knownAgents(): string[] {
@@ -195,7 +203,7 @@ async function main(argv: string[]): Promise<unknown> {
 
   const root = await repoRoot();
   const config = await loadApp(root, app);
-  const tools: Tool[] = config.type === "github" || command === "pr-verdict" ? ["bun", "git", "gh"] : ["bun", "git"];
+  const tools: Tool[] = config.type === "github" || PR_COMMANDS.has(command) ? ["bun", "git", "gh"] : ["bun", "git"];
   const problems = await checkTools(tools);
   if (problems.length) throw new TrackerError(problems.join(" "));
   const adapter: Adapter = config.type === "github" ? await GitHubAdapter.open(root, app, config.repo) : await LocalAdapter.open(root, app);
@@ -238,6 +246,23 @@ async function main(argv: string[]): Promise<unknown> {
       const issue = await getIssue(adapter, ref, app);
       const after = applyChange(issue, planClose(issue, agent, values.status!));
       return issueJson(await adapter.close(issue, after, agent));
+    }
+    case "pr-open": {
+      const issue = await getIssue(adapter, ref, app);
+      const plan = planPrOpen(issue, agent, { title: values.title!, body: await readBody(values["body-file"]!) }, await repoFacts(root));
+      const opened = await openPr(root, issue.branch!, plan.title, plan.body);
+      try {
+        await adapter.update(issue, applyChange(issue, { fields: { pr: opened.pr } }), agent, `Link pr on ${issue.ref}`);
+      } catch (error) {
+        throw new TrackerError(`Opened ${opened.pr}, but linking it to ${issue.ref} failed: ${(error as Error).message} Link it with link --field pr --value ${opened.pr}.`);
+      }
+      return { ref: issue.ref, ...opened };
+    }
+    case "pr-edit": {
+      const issue = await getIssue(adapter, ref, app);
+      const body = values["body-file"] === undefined ? undefined : await readBody(values["body-file"]);
+      const plan = planPrEdit(issue, agent, { title: values.title, body });
+      return { ref: issue.ref, ...(await editPr(issue.pr!, plan)) };
     }
     case "pr-verdict": {
       const issue = await getIssue(adapter, ref, app);
