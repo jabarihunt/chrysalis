@@ -41,16 +41,16 @@ JabStack is also used outside the factory, so it stays a standalone scaffold. Th
 - Only `@lucide/svelte` is left.
 - JabStack stays on Tailwind 3, and `components.json` points at shadcn-svelte's Tailwind 3 registry. [Current shadcn-svelte](https://shadcn-svelte.com/docs/migration) expects Tailwind 4, and Tailwind 3 projects keep working.
 
-## Decided for the factory
+## Implemented in the JabStack profile
 
-- Neon is the default production host, in the JabStack stack profile. The factory itself names no stack. `chrysalis/agents/test.md` and the acceptance-testing and regression-testing skills name Playwright and its features, so those details move into the stack profile.
-- App setup builds each app from JabStack at a commit the stack profile pins, in a temporary folder, as ADR 0030 describes. It runs `bun install` and `bun run setup:database postgres` before any other change, because the setup script edits `AGENTS.md`. Then it changes the copy:
-  - It removes `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/`, `scripts/mcp-setup.ts`, and the `mcp:setup` script. GitHub reads workflows only from the repository root, and tools read MCP config only there, so the factory provides both.
-  - It replaces `tests/acceptance/criteria.md` and `test:criteria` with the factory's convention, and renames or replaces the template's tests AC-01 to AC-05.
-  - It keeps `docs/stripe-agent-permissions.md`. The stack profile points agents at it, and agents ask for a new permission through the TPM.
-- The stack profile carries the knowledge from JabStack's `AGENTS.md`, adapted to the factory, and records the JabStack commit it was written from. Moving the pin shows what changed.
-- The app uses postgres.js, Neon's pooled string for `DATABASE_URL`, and the direct string for `DATABASE_MIGRATION_URL`. Each slice gets its own PGlite folder, and Neon is used only for runs against real Postgres. See ADR 0031. This replaces the earlier plan for a Neon branch per slice.
-- The stack profile needs Bun 1.4 or later, Node 22.17 or later for `vite preview` and Playwright, SvelteKit 3 with `#lib/` imports instead of `$lib`, TypeScript 6, Vite 8, and Vitest 5. Its test command is `test:unit`, because `bun run test` starts watch mode.
+- [`chrysalis/stacks/jabstack/profile.yaml`](../../stacks/jabstack/profile.yaml) makes Neon the default production host. The factory itself names no stack. The generic test agent and test skills defer runner details to the active stack profile.
+- The profile pins the JabStack source for app setup, which factory#9 will implement. App setup works in a temporary folder, as ADR 0030 describes. It runs `bun install` and `bun run setup:database postgres` before any copy change, because the setup script edits `AGENTS.md`. The profile then tells app setup to change the copy:
+  - Remove `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/`, `scripts/mcp-setup.ts`, and the `mcp:setup` script. GitHub reads workflows only from the repository root, and tools read MCP config only there, so the factory provides both.
+  - Remove JabStack's criteria file, criteria-check script, criteria-check package script, and template acceptance tests. Factory slices add acceptance tests from their approved criteria.
+  - Keep `docs/stripe-agent-permissions.md`. The [stack instructions](../../stacks/jabstack/instructions.md) point agents at it, and agents ask for a new permission through the TPM.
+- The stack instructions carry the needed knowledge from JabStack's `AGENTS.md`, adapted to the factory. The profile records the source commit they describe. A later factory change that moves the pin also reviews the instructions against the source diff.
+- The app uses postgres.js, Neon's pooled string for `DATABASE_URL`, and the direct string for `DATABASE_MIGRATION_URL`. Each slice gets separate PGlite folders, and Neon is used only for runs against real Postgres. See ADR 0031. This replaces the earlier plan for a Neon branch per slice.
+- The profile requires Bun 1.4 or later and Node 22.17 or later. It records SvelteKit 3, TypeScript 6, Vite 8, and Vitest 5. Its unit-test command is `test:unit`, because `bun run test` starts watch mode.
 
 ## Still open
 

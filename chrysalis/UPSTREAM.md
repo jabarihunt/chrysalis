@@ -11,4 +11,4 @@ An upstream enhancement session diffs each pinned commit against the latest one,
 | [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/` | `49dd158d1076134a641b33efb035946536778336` | 2026-10-18 |
 | [cursor/plugins](https://github.com/cursor/plugins), which holds pstack | `pstack/` | `bc1443790cc980d0ea857663260a831299884508` | 2026-10-18 |
 
-Every factory file that adapts upstream material is checked against these pins. That includes `chrysalis/agents/code-review.md`, `chrysalis/agents/test.md`, and the code review and test sections of `chrysalis/workflow/gates.md`, which adapted upstream material before this file existed.
+Every factory file that adapts either source in this table is checked against these pins. That includes `chrysalis/agents/code-review.md`, `chrysalis/agents/test.md`, and the code review and test sections of `chrysalis/workflow/gates.md`, which adapted upstream material before this file existed. Stack profiles pin their source repositories in their own `profile.yaml` files.

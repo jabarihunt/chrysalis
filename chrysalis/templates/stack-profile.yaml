@@ -1,0 +1,84 @@
+# Stack profile template. The factory-maintainer copies this file to
+# chrysalis/stacks/<stack>/profile.yaml and replaces every placeholder.
+# profile.yaml is the machine-readable contract. Put agent guidance in the
+# linked instructions file instead of YAML strings.
+
+version: 1
+name: <stack>
+instructions: instructions.md
+
+requirements:
+  <tool>: ">=<version>"
+
+technologies:
+  <technology>: "<major version>"
+
+source:
+  repository: <https clone URL>
+  commit: <full commit SHA>
+  setup:
+    - <source setup command>
+  copy:
+    remove:
+      - <path or glob removed from the app copy>
+    remove_package_scripts:
+      - <package.json script removed from the app copy>
+
+write_scopes:
+  database:
+    - "apps/<app>/<database path glob>"
+  backend:
+    - "apps/<app>/<backend path glob>"
+  frontend:
+    - "apps/<app>/<frontend path glob>"
+
+commands:
+  working_directory: "apps/<app>"
+  install: <command>
+  run: <command>
+  test:
+    unit: <command>
+    acceptance: <command>
+    all:
+      - <command>
+  typecheck: <command>
+  lint: <command>
+  build: <command>
+  audit: <command>
+  migration:
+    generate: <command>
+    apply: <command>
+
+database:
+  schema:
+    - <path>
+  migrations:
+    - <path glob>
+  local:
+    engine: <database>
+    variables:
+      development: <environment variable>
+      unit: <environment variable>
+      acceptance: <environment variable>
+    slice_urls:
+      development: <URL with slice-id placeholder>
+      unit: <URL with slice-id placeholder>
+      acceptance: <URL with slice-id placeholder>
+  production:
+    host: <host>
+    driver: <driver>
+    pooled_url: <environment variable>
+    direct_migration_url: <environment variable>
+    prepared_statements: <true or false>
+
+test:
+  runner: <runner>
+  files: <path glob>
+  fixtures:
+    page: <page fixture>
+    route: <HTTP fixture>
+  clock: <clock control>
+  repeat_option: <repeat option with count placeholder>
+  unit_database_variable: <environment variable>
+  acceptance_database_variable: <environment variable>
+  title: <test title pattern>

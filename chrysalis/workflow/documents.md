@@ -28,6 +28,7 @@ Small changes, bugs, and docs-only work have no spec file. The issue body is the
 | Model classes | Factory-maintainer | `chrysalis/models.yaml` |
 | Templates | Factory-maintainer | `chrysalis/templates/` |
 | Skills | Factory-maintainer | `chrysalis/skills/` |
+| Stack profiles | Factory-maintainer | `chrysalis/stacks/<stack>/profile.yaml`, `chrysalis/stacks/<stack>/instructions.md` |
 | Factory ADRs | Factory-maintainer | `chrysalis/docs/adr/` |
 | Planning notes | Factory-maintainer | `chrysalis/docs/planning/` |
 

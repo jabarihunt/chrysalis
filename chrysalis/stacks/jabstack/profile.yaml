@@ -1,0 +1,122 @@
+version: 1
+name: jabstack
+instructions: instructions.md
+
+requirements:
+  bun: ">=1.4.0"
+  node: ">=22.17.0"
+
+technologies:
+  sveltekit: "3"
+  svelte: "5"
+  typescript: "6"
+  vite: "8"
+  vitest: "5"
+  playwright: "1"
+  tailwindcss: "3"
+
+source:
+  repository: https://github.com/jabarihunt/jabstack.git
+  commit: 518d0e118c7b790a5b8fc0917e9926fc6207c82e
+  setup:
+    - bun install
+    - bun run setup:database postgres
+  copy:
+    remove:
+      - AGENTS.md
+      - CLAUDE.md
+      - GEMINI.md
+      - .github/
+      - scripts/mcp-setup.ts
+      - scripts/check-acceptance-criteria.ts
+      - tests/acceptance/criteria.md
+      - tests/acceptance/**/*.spec.ts
+    remove_package_scripts:
+      - mcp:setup
+      - test:criteria
+
+write_scopes:
+  database:
+    - "apps/<app>/src/lib/server/db/**"
+    - "apps/<app>/drizzle/**"
+    - "apps/<app>/drizzle.config.ts"
+    - "apps/<app>/package.json"
+    - "apps/<app>/bun.lock"
+  backend:
+    - "apps/<app>/src/lib/server/**"
+    - "apps/<app>/src/routes/**/+page.server.ts"
+    - "apps/<app>/src/routes/**/+layout.server.ts"
+    - "apps/<app>/src/routes/**/+server.ts"
+    - "apps/<app>/src/hooks.server.ts"
+    - "apps/<app>/src/env.ts"
+    - "apps/<app>/.env.example"
+    - "apps/<app>/.env.test"
+    - "apps/<app>/package.json"
+    - "apps/<app>/bun.lock"
+  frontend:
+    - "apps/<app>/src/routes/**/*.svelte"
+    - "apps/<app>/src/routes/**/+page.ts"
+    - "apps/<app>/src/routes/**/+layout.ts"
+    - "apps/<app>/src/lib/components/**"
+    - "apps/<app>/src/lib/hooks/**"
+    - "apps/<app>/src/lib/auth-client.ts"
+    - "apps/<app>/src/lib/index.ts"
+    - "apps/<app>/src/lib/utils.ts"
+    - "apps/<app>/src/app.css"
+    - "apps/<app>/static/**"
+    - "apps/<app>/components.json"
+    - "apps/<app>/tailwind.config.ts"
+    - "apps/<app>/package.json"
+    - "apps/<app>/bun.lock"
+
+commands:
+  working_directory: "apps/<app>"
+  install: bun install
+  run: bun run dev
+  test:
+    unit: bun run test:unit
+    acceptance: bun run test:acceptance
+    all:
+      - bun run test:unit
+      - bun run test:acceptance
+  typecheck: bun run check
+  lint: bun run check
+  build: bun run build
+  audit: bun audit
+  migration:
+    generate: bun run db:generate
+    apply: bun run db:migrate
+
+database:
+  schema:
+    - src/lib/server/db/schema.ts
+  migrations:
+    - drizzle/**
+  local:
+    engine: pglite
+    variables:
+      development: DATABASE_URL
+      unit: TEST_DATABASE_URL
+      acceptance: ACCEPTANCE_DATABASE_URL
+    slice_urls:
+      development: "file:.pglite/<slice-id>/dev"
+      unit: "file:.pglite/<slice-id>/unit"
+      acceptance: "file:.pglite/<slice-id>/acceptance"
+  production:
+    host: neon
+    driver: postgres.js
+    pooled_url: DATABASE_URL
+    direct_migration_url: DATABASE_MIGRATION_URL
+    prepared_statements: true
+
+test:
+  runner: playwright
+  files: tests/acceptance/**/*.spec.ts
+  fixtures:
+    page: page
+    route: request
+  clock: page.clock
+  repeat_option: "--repeat-each <count>"
+  unit_database_variable: TEST_DATABASE_URL
+  acceptance_database_variable: ACCEPTANCE_DATABASE_URL
+  title: "[<slice-id> <criterion-id>] <criterion-name>"

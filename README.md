@@ -2,7 +2,7 @@
 
 Chrysalis is an agentic software factory. You make a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, and you merge the pull requests that the TPM opens.
 
-Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 has built the tracker CLI and every skill, with security-review as a stub. The other scripts and evals come next, tracked as factory issues in the local tracker.
+Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 built the tracker CLI and every skill, with security-review as a stub. Phase 4 now has the JabStack stack profile. The tool generator, app setup and check scripts, CI, and evals come next, tracked as factory issues in the local tracker.
 
 ## Requirements
 
@@ -58,6 +58,7 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `apps/` | One folder per app, created by app setup. The template has none. |
 | `chrysalis/agents/` | One file per agent, with its role, write scope, skills, and model class |
 | `chrysalis/models.yaml` | The model each model class uses in each tool |
+| `chrysalis/stacks/` | Stack source pins, app-copy changes, layer write scopes, commands, and agent instructions |
 | `chrysalis/scripts/` | The tracker CLI and the factory's tests, including a check that `chrysalis/models.yaml` follows factory ADR 0027 and a check that accepted factory ADRs stay as they were accepted. Run the tests with `bun test chrysalis/scripts`. For the typecheck, run `bun install --cwd chrysalis/scripts` once, then `bun run --cwd chrysalis/scripts typecheck`. |
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
 | `chrysalis/templates/` | Templates for specs, issues, briefs, verdicts, and retros |

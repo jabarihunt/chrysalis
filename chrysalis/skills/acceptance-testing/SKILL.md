@@ -1,6 +1,6 @@
 ---
 name: acceptance-testing
-description: How to turn a slice's approved criteria into Playwright acceptance tests that fail before the feature exists and prove it once it does. The test agent reads it for RED and the test gate, and the code review agent reads it for the RED review.
+description: How to turn a slice's approved criteria into acceptance tests that fail before the feature exists and prove it once it does. The test agent reads it for RED and the test gate, and the code review agent reads it for the RED review.
 metadata:
   sources:
     - repo: cursor/plugins
@@ -20,7 +20,7 @@ metadata:
       commit: bc1443790cc980d0ea857663260a831299884508
       took: Driving the real user path instead of test-only endpoints, finding elements by stable handles such as accessible names, and waiting until the app is usable rather than merely running.
   license: MIT. See THIRD_PARTY_NOTICES.md at the repository root.
-  changes: Rewritten for Chrysalis RED, where the test agent writes one Playwright test per approved criterion before any code exists, and the tests are frozen at the RED commit.
+  changes: Rewritten for Chrysalis RED, where the test agent writes one acceptance test per approved criterion before any code exists, and the tests are frozen at the RED commit.
 ---
 
 # Acceptance testing
@@ -32,7 +32,7 @@ Each acceptance test is one approved criterion turned into code. Its Given becom
 The seam is where the test touches the app, and the spec names one for each criterion.
 
 - A page seam means the test opens the page and uses it as a person does, with clicks, typing, and navigation.
-- A route seam means the test calls the route with Playwright's `request` fixture, the way a client of the route does.
+- A route seam means the test calls the route with the HTTP fixture that the stack profile names, the way a client of the route does.
 
 Stay at the named seam for both the When and the Then. A test that checks a page criterion by calling the route behind the page passes even when the page never shows the result.
 
@@ -41,7 +41,7 @@ Stay at the named seam for both the When and the Then. A test that checks a page
 - Build each test's starting state through the app's own pages or routes, or with the fixtures the stack profile provides. Writing rows straight into the database skips the code that a real user's data passes through.
 - Give each test its own data, such as a unique email per test, so each test gives the same result in any order and in parallel. A test that relies on another test's leftovers fails when it runs alone.
 - Wait until the app is usable before the When, not just until it responds. Wait for what a person would wait for, such as a heading or a loaded list, and never for a fixed number of milliseconds.
-- Pin anything that varies between runs. Use Playwright's clock for dates and times, and fixed values for anything random.
+- Pin anything that varies between runs. Use the runner's clock control from the stack profile for dates and times, and fixed values for anything random.
 
 ## Drive it the way its users do
 

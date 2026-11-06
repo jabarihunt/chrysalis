@@ -62,8 +62,8 @@ Shrink the setup around the path, never the path itself. Cutting the step that t
 
 The test must fail on every run while the bug is present. A test that fails only some of the time can pass after a fix that didn't work.
 
-- Pin what varies. Use Playwright's clock for dates and fixed data for everything else, and wait for visible states instead of fixed delays.
-- For a bug that comes and goes, run the test with Playwright's `--repeat-each` option, and raise its failure rate until it fails every run, such as by repeating the trigger inside the test. When you can't, post a `question` for the TPM with the failure rate, and stop.
+- Pin what varies. Use the runner's clock control from the stack profile for dates and fixed data for everything else, and wait for visible states instead of fixed delays.
+- For a bug that comes and goes, use the stack profile's repeat option, and raise its failure rate until it fails every run, such as by repeating the trigger inside the test. When you can't, post a `question` for the TPM with the failure rate, and stop.
 
 ## Keep the RED commit to the one test
 
