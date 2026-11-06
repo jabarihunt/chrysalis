@@ -11,6 +11,10 @@ description: <description>
 # Stack profile under chrysalis/stacks/.
 stack: jabstack
 
+# The commit of the stack's source repository this app was built from. App setup
+# writes it. It stays as written, because the app keeps its own copy of the source.
+stack_commit: <commit>
+
 tracker:
   # local or github.
   type: local
