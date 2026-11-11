@@ -30,10 +30,22 @@ source:
       - scripts/mcp-setup.ts
       - scripts/check-acceptance-criteria.ts
       - tests/acceptance/criteria.md
-      - tests/acceptance/**/*.spec.ts
     remove_package_scripts:
       - mcp:setup
       - test:criteria
+    replace_text:
+      - files: tests/acceptance/**/*.spec.ts
+        replacements:
+          - old: "test('AC-01:"
+            new: "test('[setup AC-01]"
+          - old: "test('AC-02:"
+            new: "test('[setup AC-02]"
+          - old: "test('AC-03:"
+            new: "test('[setup AC-03]"
+          - old: "test('AC-04:"
+            new: "test('[setup AC-04]"
+          - old: "test('AC-05:"
+            new: "test('[setup AC-05]"
 
 write_scopes:
   database:
@@ -43,12 +55,14 @@ write_scopes:
     - "apps/<app>/package.json"
     - "apps/<app>/bun.lock"
   backend:
-    - "apps/<app>/src/lib/server/**"
+    - "apps/<app>/src/lib/server/*.ts"
     - "apps/<app>/src/routes/**/+page.server.ts"
     - "apps/<app>/src/routes/**/+layout.server.ts"
     - "apps/<app>/src/routes/**/+server.ts"
     - "apps/<app>/src/hooks.server.ts"
+    - "apps/<app>/src/app.d.ts"
     - "apps/<app>/src/env.ts"
+    - "apps/<app>/playwright.config.ts"
     - "apps/<app>/.env.example"
     - "apps/<app>/.env.test"
     - "apps/<app>/package.json"
@@ -117,6 +131,4 @@ test:
     route: request
   clock: page.clock
   repeat_option: "--repeat-each <count>"
-  unit_database_variable: TEST_DATABASE_URL
-  acceptance_database_variable: ACCEPTANCE_DATABASE_URL
   title: "[<slice-id> <criterion-id>] <criterion-name>"

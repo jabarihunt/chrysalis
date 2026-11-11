@@ -23,6 +23,11 @@ source:
       - <path or glob removed from the app copy>
     remove_package_scripts:
       - <package.json script removed from the app copy>
+    replace_text:
+      - files: <path or glob in the app copy>
+        replacements:
+          - old: <literal source text>
+            new: <literal replacement text>
 
 write_scopes:
   database:
@@ -79,6 +84,4 @@ test:
     route: <HTTP fixture>
   clock: <clock control>
   repeat_option: <repeat option with count placeholder>
-  unit_database_variable: <environment variable>
-  acceptance_database_variable: <environment variable>
   title: <test title pattern>

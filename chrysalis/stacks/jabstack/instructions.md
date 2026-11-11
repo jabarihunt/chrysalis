@@ -6,7 +6,7 @@ Read [`profile.yaml`](profile.yaml) for the source pin, layer write scopes, comm
 
 JabStack uses Bun, SvelteKit 3, Svelte 5 runes, TypeScript 6, and Vite 8. SvelteKit owns the frontend and backend. Postgres uses Drizzle with postgres.js or PGlite. Better Auth runs inside the app. Unit tests use Vitest 5, and acceptance tests use Playwright with Chromium.
 
-Use Bun for packages and scripts. Save every new dependency at an exact version. Do not run `bun run test`, because it starts Vitest in watch mode. The profile's `commands.test.unit` command runs unit tests once. The profile uses `bun run check` for both typecheck and lint because the pinned source has no separate linter.
+Use Bun for packages and scripts. Follow the repository-wide dependency and secret rules in the root [`AGENTS.md`](../../../AGENTS.md). Do not run `bun run test`, because it starts Vitest in watch mode. The profile's `commands.test.unit` command runs unit tests once. The profile uses `bun run check` for both typecheck and lint because the pinned source has no separate linter. A passing check reports zero errors and zero warnings.
 
 ## Database
 
@@ -18,7 +18,7 @@ Give each slice separate PGlite folders under `.pglite/<slice-id>/`, using the U
 
 Only one process may open a PGlite folder. Stop the process that owns a folder before migrating or opening it with another command. The development and acceptance URLs use different folders so the dev server and acceptance suite can run at the same time.
 
-Use Neon for runs that need a real Postgres server. Put Neon's pooled connection string in `DATABASE_URL` and its direct connection string in `DATABASE_MIGRATION_URL`. Reach both values through the app environment. Never print them or write them to the repository.
+Use Neon for production and for a real-Postgres compatibility run after a change to `src/lib/server/db/**`, `drizzle/**`, `drizzle.config.ts`, Better Auth's database schema or database configuration, or the versions of postgres.js, PGlite, Drizzle, or Better Auth. For that run, set `DATABASE_URL` to Neon's pooled string and `DATABASE_MIGRATION_URL` to its direct string, then run `commands.migration.apply`. Set `TEST_DATABASE_URL` and `ACCEPTANCE_DATABASE_URL` to the pooled string before running `commands.test.unit` and `commands.test.acceptance`. All other development, migration, unit-test, and acceptance-test runs use the slice's PGlite URLs.
 
 Create timestamp columns with the schema's `timestampTz` helper. Export each table's row type next to the table. Better Auth owns `users`, `sessions`, `accounts`, and `verifications`. After a Better Auth upgrade or plugin change, generate its reference schema outside the repository and compare it with the app schema.
 
@@ -26,11 +26,11 @@ Create timestamp columns with the schema's `timestampTz` helper. Export each tab
 
 Keep server-only code in `src/lib/server/`. Never import it into a client component. Put page loads and form actions in `+page.server.ts` or `+layout.server.ts`. Put JSON APIs in `+server.ts`, validate input with Zod, and return `Response.json(...)`.
 
-Declare every environment variable in `src/env.ts`. Import private values from `$app/env/private` and public values from `$app/env/public`. Do not read `process.env` in app code. `drizzle.config.ts` is the exception because Drizzle Kit runs outside SvelteKit. Update `.env.example` when the app adds a variable, and keep secret values out of every committed environment file.
+Declare every environment variable in `src/env.ts`. Import private values from `$app/env/private` and public values from `$app/env/public`. Do not read `process.env` in app code. `drizzle.config.ts` is the exception because Drizzle Kit runs outside SvelteKit. Wrap each new secret's schema with the existing `secret(...)` helper so builds can use its placeholder when production secrets are absent. Update `.env.example` with a placeholder for every variable.
 
-Better Auth handles `/api/auth/*`. Call its endpoints through `src/lib/auth-client.ts` or `auth.api`. Do not add a competing OAuth callback. If server code needs the current session, read it through `auth.api.getSession` with the request headers.
+Better Auth handles `/api/auth/*`. Call its endpoints through `src/lib/auth-client.ts` or `auth.api`. Do not add a competing OAuth callback. If server code needs the current session, read it through `auth.api.getSession` with the request headers. Before adding an authentication guard to `/dashboard`, replace the redirect placeholder at `/auth/login` with a real sign-in page. Otherwise, a signed-out request loops between the two routes.
 
-JabStack has Stripe and Resend helpers. Acceptance and unit tests must not call Google, Stripe, Resend, Neon, or another network service unless the approved test run requires real Postgres. Before changing Stripe through an agent tool, read `docs/stripe-agent-permissions.md`. Ask the TPM for any permission that file does not grant.
+JabStack has Stripe and Resend helpers. Acceptance and unit tests do not call Google, Stripe, Resend, or another network service. The real-Postgres compatibility run in the database section is the only test run that contacts Neon. Before changing Stripe through an agent tool, read `docs/stripe-agent-permissions.md`. Ask the TPM for any permission that file does not grant.
 
 ## Frontend
 
@@ -42,10 +42,10 @@ JabStack stays on Tailwind CSS 3. `components.json` points to shadcn-svelte's Ta
 
 ## Acceptance tests
 
-Write Playwright tests under `tests/acceptance/<feature>/`. Use one test per approved criterion and the title format in `profile.yaml`. The slice spec owns the criteria. The factory copy has no `tests/acceptance/criteria.md` or `test:criteria` script.
+App setup keeps JabStack's source smoke tests for AC-01 through AC-05 and renames their titles to `[setup AC-NN] ...`. New slices put Playwright tests under `tests/acceptance/<feature>/`. Use one test per approved criterion and the title format in `profile.yaml`. The slice spec owns the criteria. The factory copy has no `tests/acceptance/criteria.md` or `test:criteria` script.
 
 Use Playwright's `page` fixture for page seams and `request` for route seams. Use `page.clock` to pin dates and times. For an intermittent regression, append the profile's `test.repeat_option` to `commands.test.acceptance` and report the number of runs.
 
-The acceptance command builds the app and starts `vite preview` on port 4173. It installs Chromium when needed. The Playwright configuration supplies placeholder service credentials and reads `ACCEPTANCE_DATABASE_URL`. Use the slice's acceptance PGlite URL unless the approved run requires a real Postgres server.
+The acceptance command builds the app and starts `vite preview` on port 4173. It installs Chromium when needed. The Playwright configuration supplies placeholder service credentials and reads `ACCEPTANCE_DATABASE_URL`. Standard runs use the slice's acceptance PGlite URL. Use Neon only for the compatibility run that the database section requires.
 
 Unit tests stay next to the code they cover as `*.test.ts`. Mock SvelteKit environment modules and external service SDKs. Every unit test must reach at least one assertion.
