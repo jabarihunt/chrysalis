@@ -1,7 +1,8 @@
 # Model classes for Chrysalis agents.
 #
-# Each agent file names one class in its model_class field. Phase 4's
-# generator writes each class's model into that tool's agent files.
+# Each agent file names one class in its model_class field.
+# bun chrysalis/scripts/generate.ts writes each class's model into that tool's
+# agent files. Run it after every change to this file, and commit what it writes.
 #
 # Factory ADR 0027: within one tool, each gate's class uses a different model
 # family from every class whose work that gate reviews.
@@ -17,8 +18,15 @@
 #
 # confirmed: true means the ID was checked against the tool's own model list.
 # confirmed: false means the ID comes from the tool's docs and still needs a
-# check. The generator refuses to write an unconfirmed ID. When a model isn't
-# available on the human's plan, the generator uses its fallback.
+# check. When a model isn't available on the human's plan, set
+# fallback_confirmed: true once the fallback is checked, and the generator uses
+# the fallback. The generator writes a tool's agent files only when every class
+# has a confirmed model or fallback, writes none for a tool with no class
+# confirmed, and stops when only some are, per factory ADR 0033.
+#
+# The template confirms no model, because each copy confirms its own. The IDs
+# here are the template's suggestions as of each tool's note. bun test
+# chrysalis/scripts fails when the template's copy of this file confirms one.
 
 classes:
   plan:

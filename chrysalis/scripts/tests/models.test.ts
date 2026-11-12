@@ -1,9 +1,11 @@
 // Checks chrysalis/models.yaml against factory ADR 0027: within one tool, each gate's class uses a
 // different family, or a different model in a single-family tool, from every class whose work it reviews.
+// Also checks factory ADR 0033: the template confirms no model.
 import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
+import { isTemplate } from "../lib/template";
 
-type ClassEntry = { family: string; model: string; fallback?: string; confirmed: boolean };
+type ClassEntry = { family: string; model: string; fallback?: string; confirmed: boolean; fallback_confirmed?: boolean };
 type Tool = { single_family?: boolean } & Record<string, unknown>;
 type Models = { classes: Record<string, unknown>; tools: Record<string, Tool> };
 
@@ -33,6 +35,19 @@ function sharedPairs(tool: Tool): string[] {
     }
   }
   return problems;
+}
+
+/** Every model or fallback that models.yaml marks as confirmed, as "<tool> <class>: <id>". */
+function confirmedIds(models: Models): string[] {
+  const out: string[] = [];
+  for (const [name, tool] of Object.entries(models.tools)) {
+    for (const cls of CLASSES) {
+      const entry = tool[cls] as ClassEntry;
+      if (entry.confirmed) out.push(`${name} ${cls}: ${entry.model}`);
+      if (entry.fallback_confirmed) out.push(`${name} ${cls}: ${entry.fallback}`);
+    }
+  }
+  return out;
 }
 
 async function loadModels(): Promise<Models> {
@@ -66,6 +81,19 @@ describe("models.yaml", () => {
       const families = new Set(CLASSES.map((cls) => (tool[cls] as ClassEntry).family));
       if (families.size === 1) expect(tool.single_family, name).toBe(true);
     }
+  });
+
+  test("the template ships no confirmed model ID", async () => {
+    // Factory ADR 0033: each copy confirms its own models, so a confirmation made in the template
+    // must never reach a copy. In a copy, origin is the copy's own repository, and this test passes.
+    if (!(await isTemplate(resolve(import.meta.dir, "..", "..", "..")))) return;
+    expect(confirmedIds(await loadModels())).toEqual([]);
+  });
+
+  test("the template check finds every confirmed model and fallback", () => {
+    const entry = (confirmed: boolean, fallback_confirmed?: boolean): ClassEntry => ({ family: "claude", model: "m", fallback: "f", confirmed, fallback_confirmed });
+    const tool = { plan: entry(false), build: entry(true), test: entry(false, true), review: entry(false, false) };
+    expect(confirmedIds({ classes: {}, tools: { kiro: tool } })).toEqual(["kiro build: m", "kiro test: f"]);
   });
 
   test("the check catches the mappings ADR 0027 rules out", () => {

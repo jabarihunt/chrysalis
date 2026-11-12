@@ -30,6 +30,7 @@ Small changes, bugs, and docs-only work have no spec file. The issue body is the
 | Skills | Factory-maintainer | `chrysalis/skills/` |
 | Stack profiles | Factory-maintainer | `chrysalis/stacks/<stack>/profile.yaml`, `chrysalis/stacks/<stack>/instructions.md` |
 | Factory ADRs | Factory-maintainer | `chrysalis/docs/adr/` |
+| Generated tool config | Factory-maintainer, by running `bun chrysalis/scripts/generate.ts` | `.cursor/agents/`, `.kilo/agents/`, `.kiro/agents/`, `.kiro/hooks/chrysalis-deny-commands.json`, `.claude/agents/`, `.claude/settings.json` |
 | Planning notes | Factory-maintainer | `chrysalis/docs/planning/` |
 
 ## Rules
