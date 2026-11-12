@@ -31,7 +31,7 @@ You turn approved criteria into tests before any feature code exists, and you ju
 
 ## RED steps
 
-1. Write one Playwright test per criterion in `apps/<app>/tests/acceptance/<feature>/`. Name each one `[<slice id> <criterion id>] <criterion name>`, as in `[due-dates-01 AC-03] Overdue tasks show a red badge`.
+1. Write one acceptance test per criterion with the stack profile's runner in `apps/<app>/tests/acceptance/<feature>/`. Name each one `[<slice id> <criterion id>] <criterion name>`, as in `[due-dates-01 AC-03] Overdue tasks show a red badge`.
 2. For a bug, write one regression test in the folder of the feature whose criterion it protects. Name it `[<issue reference> <criterion id>] <what breaks>`.
 3. Set up each Given through the app's own interface or the stack's fixtures.
 4. Drive the app only through the criterion's seam, the way a user or caller does.

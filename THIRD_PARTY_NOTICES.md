@@ -1,6 +1,6 @@
 # Third-party notices
 
-Parts of this repository are copied or adapted from the projects below. Each skill or template that uses upstream material names its source in its frontmatter or opening comment, and [chrysalis/UPSTREAM.md](chrysalis/UPSTREAM.md) pins the upstream commits.
+Parts of this repository are copied or adapted from the projects below. Each skill or template that uses upstream material names its source in its frontmatter or opening comment. [chrysalis/UPSTREAM.md](chrysalis/UPSTREAM.md) pins those upstream commits. A stack profile pins its own source in `profile.yaml`.
 
 | Factory file | Source | Use |
 |---|---|---|
@@ -28,6 +28,7 @@ Parts of this repository are copied or adapted from the projects below. Each ski
 | `chrysalis/agents/code-review.md` and `chrysalis/workflow/gates.md` | Matt Pocock's skills, `skills/engineering/code-review/SKILL.md` | The spec and standards review axes adapted. |
 | `chrysalis/agents/spec-writer.md` | Matt Pocock's skills, `skills/engineering/to-spec/SKILL.md`, `skills/engineering/to-tickets/SKILL.md`, and `skills/engineering/domain-modeling/ADR-FORMAT.md` | Seam choice, vertical slices, and when to write an ADR adapted. |
 | `chrysalis/agents/test.md` and `chrysalis/workflow/gates.md` | pstack, `pstack/skills/principle-test-behavior-not-implementation/SKILL.md` | A test that fails when the behavior breaks, in its simplest form a test that fails when every import returns `undefined`, adapted. |
+| `chrysalis/stacks/jabstack/instructions.md` | JabStack, `AGENTS.md` | Stack, file, database, SvelteKit, UI-library, and Playwright conventions adapted for apps built by Chrysalis. |
 
 ## pstack
 
@@ -84,3 +85,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## JabStack
+
+Source: https://github.com/jabarihunt/jabstack/tree/518d0e118c7b790a5b8fc0917e9926fc6207c82e
+
+`chrysalis/stacks/jabstack/instructions.md` adapts the stack and coding conventions from JabStack's `AGENTS.md`. The stack profile pins the source commit. JabStack's README identifies the project as MIT licensed.
