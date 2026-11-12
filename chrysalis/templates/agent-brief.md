@@ -4,7 +4,7 @@ ROLE: You are the <agent> agent. Read `chrysalis/agents/<agent>.md` and every sk
 
 ISSUE: <app>#<n>, currently `<status>`
 
-MODEL: <The tool and model this run uses. For a gate run, also the tool and model of the work under review, taken from that agent's report. Until the generated agent files pin each agent's model, the human names the models.>
+MODEL: <The tool and model this run uses. For a gate run, also the tool and model of the work under review, taken from that agent's report. When the tool has a generated agent file for this agent, such as `.kiro/agents/<agent>.json`, it pins the model. Otherwise the human names the model and starts the run on it.>
 
 GOAL: <One sentence on the outcome of this run, clear to someone who hasn't seen the chat.>
 

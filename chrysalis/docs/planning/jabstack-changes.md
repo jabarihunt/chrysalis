@@ -44,7 +44,7 @@ JabStack is also used outside the factory, so it stays a standalone scaffold. Th
 ## Implemented in the JabStack profile
 
 - [`chrysalis/stacks/jabstack/profile.yaml`](../../stacks/jabstack/profile.yaml) makes Neon the default production host. The factory itself names no stack. The generic test agent and test skills defer runner details to the active stack profile.
-- The profile pins the JabStack source for app setup, which factory#9 will implement. App setup works in a temporary folder, as ADR 0030 describes. It runs `bun install` and `bun run setup:database postgres` before any copy change, because the setup script edits `AGENTS.md`. The profile then tells app setup to change the copy:
+- The profile pins the JabStack source for app setup, which factory#51 will implement. App setup works in a temporary folder, as ADR 0030 describes. It runs `bun install` and `bun run setup:database postgres` before any copy change, because the setup script edits `AGENTS.md`. The profile then tells app setup to change the copy:
   - Remove `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/`, `scripts/mcp-setup.ts`, and the `mcp:setup` script. GitHub reads workflows only from the repository root, and tools read MCP config only there, so the factory provides both.
   - Rename the template acceptance-test titles from `AC-NN: ...` to `[setup AC-NN] ...`. Keep the tests as the app setup smoke suite.
   - Remove JabStack's criteria file, criteria-check script, and criteria-check package script. Factory slices add their own acceptance tests from approved criteria.

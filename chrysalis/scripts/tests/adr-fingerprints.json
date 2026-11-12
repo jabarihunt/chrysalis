@@ -29,5 +29,7 @@
   "0028-factory-pull-requests-go-through-code-review.md": "cf578f357ce6415e5cc66125ee1bd6a3c985879824c0fffc7b42c08aa669e8d8",
   "0029-the-tpm-and-the-factory-maintainer-open-pull-requests.md": "c3c64e43cab25b1aa7187409586c721cd81ee72de8f734ee0aadb2da6cd7452e",
   "0030-app-setup-copies-a-stack-source-at-a-pinned-commit.md": "881e9ea162c1778737f2991c9f8b2bb1ac043e07d4fdc0f1c36571355fc6474f",
-  "0031-jabstack-apps-use-neon-through-postgres-js-with-pglite-per-slice.md": "84f711ff15fb91c5361cc2e9756eb6e3e1e33062c8617ec82048762e131f87d4"
+  "0031-jabstack-apps-use-neon-through-postgres-js-with-pglite-per-slice.md": "84f711ff15fb91c5361cc2e9756eb6e3e1e33062c8617ec82048762e131f87d4",
+  "0032-tool-files-enforce-scopes-and-denied-commands.md": "85958056262e72da642eb12a0afe56d1547c8a07666c1eff59937e96640602ce",
+  "0033-agent-files-need-confirmed-models-and-the-template-confirms-none.md": "e20d01d1241f09688bc523307f708569953c2997ea8f670b81cae6dad3281a6c"
 }

@@ -16,7 +16,7 @@ A gate decides whether work moves to the next step. Agent gates post a verdict o
 
 - Gate agents post verdicts with the [gate verdict template](../templates/gate-verdict.md). A verdict is `pass` or `block`, and it names the commit SHA it checked. The tracker CLI reads the `Gate:`, `Verdict:`, and `Commit:` lines, and refuses a verdict without them or from an agent that doesn't run that gate.
 - The code review gate posts its verdict on the pull request with `tracker pr-verdict`, which also sets the `chrysalis/code-review` commit status. The verdict holds the whole review, and its commit is the pull request's head commit. Code review results stay off the issue: the verdict, its findings, and any summary of them go only on the pull request. The one exception is the retro, which names each code review block's cause in one sentence and the rule it missed, and links the verdict. In a repository with no remote, no pull request exists, so the verdict goes on the issue. [Factory ADR 0026](../docs/adr/0026-code-review-verdicts-go-on-the-pull-request.md) explains why, and [the tracker guide](tracker.md#code-review-verdicts) describes the command.
-- A verdict names the tool and model it ran on, and whether that model's family matches the family of the work it reviewed. A same-family verdict is allowed only in a tool marked `single_family` in `chrysalis/models.yaml`. When the tool doesn't tell the agent which model it runs, the agent copies both models from the brief's MODEL field and writes "attested in the brief" after them. TODO(factory#9): Once the generated agent files pin each agent's model, the gate's own model comes from its agent file.
+- A verdict names the tool and model it ran on, and whether that model's family matches the family of the work it reviewed. A same-family verdict is allowed only in a tool marked `single_family` in `chrysalis/models.yaml`. When the tool doesn't tell the agent which model it runs, and the run started from the tool's generated agent file, such as `.kiro/agents/code-review.json`, the agent names the model that file pins. Otherwise it copies both models from the brief's MODEL field and writes "attested in the brief" after them. A tool has generated agent files only once the copy confirms its models, as [factory ADR 0033](../docs/adr/0033-agent-files-need-confirmed-models-and-the-template-confirms-none.md) says.
 - A pass stays valid while every later commit changes only files outside the gate's inputs. The RED review takes the spec and the acceptance tests as input. The security and test gates take every file except docs for people. The code review gate takes every file, and the pull request's title and body. `tracker pr-edit` withdraws a code review pass by setting the `chrysalis/code-review` status back to `pending`, so the gate runs again after every edit.
 - A block sets the issue to `blocked`. Only a pass from the same gate clears it.
 - Each block counts toward that gate's limit on the issue. The third block goes to the human.
@@ -103,7 +103,7 @@ The agent also confirms that:
 - every earlier gate has a valid pass for the current commit,
 - `chrysalis/scripts/check.ts` passes.
 
-Until `check.ts` exists, the agent writes "check.ts: not built yet" under the verdict's Checks and doesn't block on it. TODO(factory#9): Remove this exception once `check.ts` exists.
+Until `check.ts` exists, the agent writes "check.ts: not built yet" under the verdict's Checks and doesn't block on it. TODO(factory#50): Remove this exception once `check.ts` exists.
 
 The agent blocks on any spec-axis finding, a missing link, a write-scope violation, or a breach of a documented standard. It reports code smells without blocking.
 
@@ -122,4 +122,4 @@ Every factory pull request goes through this gate, and the factory-maintainer is
 7. Each gate's latest verdict is a pass that is still valid for the current commit. The code review gate's latest verdict is the one on the pull request.
 8. Every `TODO` comment cites an issue.
 9. A pull request changes either the factory or one app.
-10. For factory changes, the generated tool files match `chrysalis/agents/`.
+10. For factory changes, the generated tool files match their sources, as `bun chrysalis/scripts/generate.ts --check` reports.

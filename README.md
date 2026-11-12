@@ -2,7 +2,7 @@
 
 Chrysalis is an agentic software factory. You make a request to a TPM agent. The TPM breaks it into slices and runs each slice through spec, implementation, and gate agents. Every slice gets a spec and failing tests before any feature code is written. You approve the scope and the acceptance criteria, and you merge the pull requests that the TPM opens.
 
-Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 built the tracker CLI and every skill, with security-review as a stub. Phase 4 now has the JabStack stack profile. The tool generator, app setup and check scripts, CI, and evals come next, tracked as factory issues in the local tracker.
+Chrysalis is a draft. Phase 1 wrote the workflow and templates, phase 2 wrote the agent files and model classes, and phase 3 built the tracker CLI and every skill, with security-review as a stub. Phase 4 now has the JabStack stack profile and the tool generator. The app setup and check scripts, CI, and evals come next, tracked as factory issues in the local tracker.
 
 ## Requirements
 
@@ -45,7 +45,9 @@ Open the repository in Cursor, Kilo, Kiro, or Claude Code. Each one loads [AGENT
 - To build or change an app, describe what you want. The agent works as the TPM.
 - To change the factory itself, start your first message with `factory:`. The agent works as the factory-maintainer.
 
-The tools list the agents in their menus once phase 4 generates each tool's agent files. Until then, the TPM starts each agent with a brief that names its file.
+A tool lists the agents in its menus once your copy confirms that tool's models in `chrysalis/models.yaml` and you run `bun chrysalis/scripts/generate.ts`. The template confirms no models, because tools retire models and each plan offers different ones. Until your copy confirms them, the TPM starts each agent with a brief that names its file.
+
+Whatever the models, Kiro and Claude Code block the commands no agent may run, such as `gh pr merge`, `gh api`, and `git push` to `master`. Claude Code also blocks each agent's edits outside its write scope.
 
 ## Layout
 
@@ -55,11 +57,12 @@ The tools list the agents in their menus once phase 4 generates each tool's agen
 | `CLAUDE.md` | An import of `AGENTS.md`, so Claude Code loads it reliably |
 | `LICENSE` | The MIT license |
 | `.github/rulesets/` | The `master` ruleset for each copy to import |
+| `.cursor/`, `.kilo/`, `.kiro/`, `.claude/` | Tool config that `bun chrysalis/scripts/generate.ts` writes. Don't edit it by hand. The template has only the Kiro command hook and the Claude Code settings. |
 | `apps/` | One folder per app, created by app setup. The template has none. |
 | `chrysalis/agents/` | One file per agent, with its role, write scope, skills, and model class |
 | `chrysalis/models.yaml` | The model each model class uses in each tool |
 | `chrysalis/stacks/` | Stack source pins, app-copy changes, layer write scopes, commands, and agent instructions |
-| `chrysalis/scripts/` | The tracker CLI and the factory's tests, including a check that `chrysalis/models.yaml` follows factory ADR 0027 and a check that accepted factory ADRs stay as they were accepted. Run the tests with `bun test chrysalis/scripts`. For the typecheck, run `bun install --cwd chrysalis/scripts` once, then `bun run --cwd chrysalis/scripts typecheck`. |
+| `chrysalis/scripts/` | The tracker CLI, the tool generator and the hooks it sets up, and the factory's tests. The tests check that `chrysalis/models.yaml` follows factory ADR 0027, that accepted factory ADRs stay as they were accepted, and that the generated tool config is current. Run the tests with `bun test chrysalis/scripts`. For the typecheck, run `bun install --cwd chrysalis/scripts` once, then `bun run --cwd chrysalis/scripts typecheck`. |
 | `chrysalis/workflow/` | The pipeline, gates, document map, and tracker rules |
 | `chrysalis/templates/` | Templates for specs, issues, briefs, verdicts, and retros |
 | `chrysalis/skills/` | Skills the agents read |

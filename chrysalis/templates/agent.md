@@ -12,7 +12,7 @@ skills:
   - chrysalis/skills/unslop/SKILL.md
 ---
 
-<!-- Agent file template. The factory-maintainer writes one file per agent at chrysalis/agents/<agent>.md. Phase 4's generator reads the frontmatter and writes each tool's agent files from it. Delete these comments.
+<!-- Agent file template. The factory-maintainer writes one file per agent at chrysalis/agents/<agent>.md. bun chrysalis/scripts/generate.ts reads the frontmatter and writes each tool's agent files and permission rules from it, so run it after every change to an agent file and commit what it writes. It refuses a field this template doesn't define. Delete these comments.
 
 Frontmatter fields:
 - name. Lowercase letters and hyphens. It matches the file name.
@@ -35,6 +35,8 @@ Frontmatter fields:
 - skills. Paths to the SKILL.md files the agent reads before it starts.
 
 Every agent is denied these commands, whatever its shell groups: gh api, gh pr create, gh pr merge, gh pr review, git push to master, git push --force, git rebase, git reset --hard, and git branch -D. gh api is denied whole, reads included. The -f, -F, and --input flags switch it to POST without -X, and GraphQL mutations run through it too, so a rule can't reliably tell its reads from its writes. The tracker CLI calls gh inside its own process, so the deny doesn't affect it.
+
+chrysalis/scripts/lib/commands.ts turns the shell groups and this denied list into each tool's rules and the command hook. A change to a group or to the list changes that file in the same commit.
 
 Body sections, in this order. Keep each agent-specific, and link to chrysalis/workflow/ instead of restating it.
 -->
